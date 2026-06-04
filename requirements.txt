@@ -1,0 +1,14 @@
+streamlit
+os
+zipfile
+tempfile
+uuid
+pandas
+datetime
+pythoncom
+pretty_html_table 
+numpy
+time
+lxml
+re
+calendar
