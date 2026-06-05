@@ -91,24 +91,24 @@ if st.button("🚀 Execute"):
 
                 result_files = processor.process(data)
 
-            # создаём zip
-            zip_path = os.path.join(tempfile.gettempdir(), "results.zip")
+            # создаём zip в памяти
+            zip_buffer = io.BytesIO()
 
-            with zipfile.ZipFile(zip_path, "w") as zipf:
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
                 for file_path in result_files:
                     zipf.write(file_path, arcname=os.path.basename(file_path))
-                    
+                    os.remove(file_path)
+
             st.success("Done!")
             st.balloons()
-
-            with open(zip_path, "rb") as f:
-                st.download_button(
-                    label="📥 Download all results",
-                    data=f,
-                    file_name="results.zip",
-                    mime="application/zip"
-                )
-
+            
+            st.download_button(
+                label="📥 Download all results",
+                data=zip_buffer,
+                file_name="results.zip",
+                mime="application/zip"
+            )
+            
     except Exception as e:
 
         st.error(f"Ошибка: {e}")
