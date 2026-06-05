@@ -48,12 +48,9 @@ class OffenePostenProcessor(BaseProcessor):
         #В интерфейсе Streamlit Cloud:
         #Зайдите в ваш апп → Settings → Secrets (вкладка)
         #Добавьте ключи в формате TOML:       
-        #####WEB_PASS=
+        #####WEB_PASS=....
         #В коде читайте их так:       
-        password = st.secrets.WEB_PASS
-        
-        # NUR LOCAL
-            
+        password = st.secrets.WEB_PASS   
         #################################
 
         current_date = date.today() + timedelta(days=days_to_add)
@@ -132,7 +129,7 @@ class OffenePostenProcessor(BaseProcessor):
                 
         #---Mail-----------------------------------------------------------------
                 if pd.isna(ms_html) or not str(ms_html).strip() or pd.isna(kunde_mail) or not str(kunde_mail).strip():                    
-                    protocol.append([f'❌ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'displayet: kunde_mail fehlt!'])
+                    protocol.append([f'❌ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'warn: kunde_mail fehlt!'])
                 else:
                     protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet'])   
                     send_email(kunde_mail, 'Mahnung', html_body)
