@@ -113,7 +113,7 @@ class OffenePostenProcessor(BaseProcessor):
 
         #---Signature--------------------------------------------------------
         
-            signature_htm = '' #f.read()
+        signature_htm = '' #f.read()
                       
         #---Grouped_by_kto  &  Columns_to_include--------------------
         grouped_by_kto = result.groupby('Kto.')
