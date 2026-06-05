@@ -10,9 +10,12 @@ import os
 import uuid
 import pandas as pd
 from datetime import date, datetime, timedelta
-import win32com.client as win32com
-import pythoncom
+#import win32com.client as win32com
+#import pythoncom
 from pretty_html_table import build_table
+
+import smtplib
+from email.message import EmailMessage
 
 
 class OffenePostenProcessor(BaseProcessor):
@@ -40,6 +43,18 @@ class OffenePostenProcessor(BaseProcessor):
         days_to_add = -3
         y_sheet1 = 'Sheet1'
         y_sheet2 = 'Sheet2'
+        
+        #################################
+        #В интерфейсе Streamlit Cloud:
+        #Зайдите в ваш апп → Settings → Secrets (вкладка)
+        #Добавьте ключи в формате TOML:       
+        #####WEB_PASS=
+        #В коде читайте их так:       
+        password = st.secrets.WEB_PASS
+        
+        # NUR LOCAL
+            
+        #################################
 
         current_date = date.today() + timedelta(days=days_to_add)
         min_date = datetime.strptime(min_date_str, "%Y-%m-%d").date()
@@ -82,14 +97,23 @@ class OffenePostenProcessor(BaseProcessor):
         output_files.append(output_file1)
         output_files.append(output_file2)
         
+        def send_email(to_email, subject, body):
+            msg = EmailMessage()
+            msg['From'] = "garrys64001@web.de"
+            msg['To'] = to_email
+            msg['Subject'] = subject
+            msg.set_content(body, subtype='html')
+            
+            with smtplib.SMTP_SSL('smtp.web.de', 465) as server:
+                server.login("garrys64001@web.de", password)
+            
+                
+                server.send_message(msg)
 
-        #---Outlook----------------------------------------------------------
-        pythoncom.CoInitialize()
-        outlook = win32com.DispatchEx('Outlook.Application')
-        
+
         #---Signature--------------------------------------------------------
-        with open(r'C:\Users\garry\AppData\Roaming\Microsoft\Signatures\is.htm', 'r', encoding='MacCyrillic') as f:
-            signature_htm = f.read()
+        
+            signature_htm = '' #f.read()
                       
         #---Grouped_by_kto  &  Columns_to_include--------------------
         grouped_by_kto = result.groupby('Kto.')
@@ -107,17 +131,12 @@ class OffenePostenProcessor(BaseProcessor):
                 html_body = f"""<html><head></head><body>{ms_html}<br><br><p>{table_html}<br><br></p>{signature_htm}</body></html>"""
                 
         #---Mail-----------------------------------------------------------------
-                mail = outlook.CreateItem(0)
-                mail.To = kunde_mail
-                mail.Subject = 'Mahnung'
-                mail.HTMLBody  = html_body
-                
                 if pd.isna(ms_html) or not str(ms_html).strip() or pd.isna(kunde_mail) or not str(kunde_mail).strip():                    
                     protocol.append([f'❌ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'displayet: kunde_mail fehlt!'])
-                    mail.Display(False)
                 else:
-                    protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet'])
-                    mail.Send() 
+                    protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet'])   
+                    send_email(kunde_mail, 'Mahnung', html_body)
+               
 #---
         st.dataframe(pd.DataFrame(protocol, columns=['Kto.', 'Kto.-Name', 'Ergebnis']))
         
