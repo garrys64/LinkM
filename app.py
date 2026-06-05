@@ -4,6 +4,7 @@
 
 import streamlit as st
 import os
+import io
 import zipfile
 import tempfile
 
