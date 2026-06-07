@@ -82,7 +82,7 @@ class OffenePostenProcessor(BaseProcessor):
         #В интерфейсе Streamlit Cloud: > Settings > Secrets > WEB_PASS=....
         
         email_from_name = 'garrys64001@web.de'
-        email_from_password = "svile2009we001"#st.secrets.WEB_PASS          
+        email_from_password = st.secrets.WEB_PASS          
         smtp_name = 'smtp.web.de'
         smtp_port = 465
         #-------------------------------------------------------------------
