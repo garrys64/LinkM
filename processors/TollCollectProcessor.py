@@ -47,12 +47,12 @@ class TollCollectProcessor(BaseProcessor):
             return phones_str
             
         column_number = 2
-        cleaned_phones = clean_phone_series(phones_df.iloc[:, column_number])  # колонка 3
+        cleaned_phones = clean_phone_series(phones_df.iloc[:, column_number])  
         code_list = sorted(result['code'].values, key=len, reverse=True)   
                
         def find_code(phone):
-            if phone == "":
-                return '0000'           # пропускаем пустые строки
+            if pd.isna(phone) or (isinstance(phone, str) and phone == ""):
+                pass           # пропускаем пустые строки
             for code in code_list:
                 if phone.startswith(code):
                     return code
