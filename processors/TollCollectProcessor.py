@@ -52,7 +52,7 @@ class TollCollectProcessor(BaseProcessor):
                
         def find_code(phone):
             if pd.isna(phone) or (isinstance(phone, str) and phone == ""):
-                pass           # пропускаем пустые строки
+                return '0000'           # пропускаем пустые строки
             for code in code_list:
                 if phone.startswith(code):
                     return code
