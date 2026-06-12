@@ -13,6 +13,7 @@ from processors.TollCollectProcessor import TollCollectProcessor
 from processors.XmlProcessor import XmlProcessor
 from processors.WhatsappProcessor import WhatsappProcessor
 from processors.a_OffenePostenProcessor import OffenePostenProcessor
+from processors.BwiProcessor import BwiProcessor
 
 
 processors = [
@@ -20,6 +21,7 @@ processors = [
     XmlProcessor(),
     OffenePostenProcessor(),
     WhatsappProcessor(),
+    BwiProcessor(),
 ]
 
 processor_dict = {
