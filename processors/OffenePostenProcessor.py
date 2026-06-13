@@ -24,7 +24,7 @@ Y_SHEET2 = 'Sheet2'
 EMAIL_FROM_NAME = 'garrys64001@web.de'    
 EMAIL_FROM_PASSWORD = st.secrets.WEB_PASS  #В интерфейсе Streamlit Cloud: > Settings > Secrets > WEB_PASS=....     
 SMTP_NAME = 'smtp.web.de'
-SMTP_PORT = 465
+SMTP_PORT = 587 #465
 
 class OffenePostenProcessor(BaseProcessor):
 
@@ -119,8 +119,7 @@ class OffenePostenProcessor(BaseProcessor):
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    context = ssl.create_default_context()
-                    with smtplib.SMTP_SSL(SMTP_NAME, SMTP_PORT , timeout=30, context=context) as server:
+                    with smtplib.SMTP_STARTTLS(SMTP_NAME, SMTP_PORT) as server:
                         server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
                         server.send_message(msg)
                            
