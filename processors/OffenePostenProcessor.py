@@ -113,7 +113,7 @@ class OffenePostenProcessor(BaseProcessor):
                 else:
                     protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
                     
-                    st.write({self.EMAIL_FROM_NAME}   {self.SMTP_NAME}   {self.SMTP_PORT}   )
+                    st.write("{self.EMAIL_FROM_NAME}   {self.SMTP_NAME}   {self.SMTP_PORT} "  )
                     
                     msg = EmailMessage()
                     msg['From'] = self.EMAIL_FROM_NAME
