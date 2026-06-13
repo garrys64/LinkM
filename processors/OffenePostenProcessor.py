@@ -62,7 +62,7 @@ class OffenePostenProcessor(BaseProcessor):
 
         result, result_SPoint, kundeliste_sheets = self._prepare_data(Datendatei, Kundeliste)
         result = self._apply_email_editor(result, email_editor)
-        kundeliste_sheets[Y_SHEET1] = self._apply_email_editor(kundeliste_sheets[Y_SHEET1], email_editor)
+        kundeliste_sheets[self.Y_SHEET1] = self._apply_email_editor(kundeliste_sheets[self.Y_SHEET1], email_editor)
 
         #--- save output_files ----------------------------------------------------
         os.makedirs("results", exist_ok=True)
@@ -114,13 +114,13 @@ class OffenePostenProcessor(BaseProcessor):
                     protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
                     
                     msg = EmailMessage()
-                    msg['From'] = EMAIL_FROM_NAME
+                    msg['From'] = self.EMAIL_FROM_NAME
                     msg['To'] = kunde_mail
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    with smtplib.SMTP_SSL(SMTP_NAME, SMTP_PORT) as server:
-                        server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
+                    with smtplib.SMTP_SSL(self.SMTP_NAME, self.SMTP_PORT) as server:
+                        server.login(self.EMAIL_FROM_NAME, self.EMAIL_FROM_PASSWORD)              
                         server.send_message(msg)
                            
         return protocol
@@ -128,8 +128,8 @@ class OffenePostenProcessor(BaseProcessor):
 #--------------------------
     def _prepare_data(self, Datendatei, Kundeliste):
         
-        current_date = date.today() + timedelta(days=DAYS_TO_ADD)
-        min_date = datetime.strptime(MIN_DATE_STR, "%Y-%m-%d").date()
+        current_date = date.today() + timedelta(days=self.DAYS_TO_ADD)
+        min_date = datetime.strptime(self.MIN_DATE_STR, "%Y-%m-%d").date()
 
         #---Datendatei---------------------------------------------------------------------------------------------------
         df = pd.read_excel(Datendatei, header=1)
@@ -137,11 +137,11 @@ class OffenePostenProcessor(BaseProcessor):
         result = df[(df['Fälligkeit'].dt.date < current_date) & (df['Fälligkeit'].dt.date > min_date) & (df['Restbetrag'] > 0)]
 
         #---Kundeliste-----------------------------------------------------------------------------------------------------
-        dfY1 = pd.read_excel(Kundeliste, sheet_name=Y_SHEET1, header=0)
-        dfY2 = pd.read_excel(Kundeliste, sheet_name=Y_SHEET2, header=0)
+        dfY1 = pd.read_excel(Kundeliste, sheet_name=self.Y_SHEET1, header=0)
+        dfY2 = pd.read_excel(Kundeliste, sheet_name=self.Y_SHEET2, header=0)
         kundeliste_sheets = {
-            Y_SHEET1: dfY1.copy(),
-            Y_SHEET2: dfY2.copy(),
+            self.Y_SHEET1: dfY1.copy(),
+            self.Y_SHEET2: dfY2.copy(),
         }
 
         #---Bearbeitung-----------------------------------------------------------------------------------------------------
