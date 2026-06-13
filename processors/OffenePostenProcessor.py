@@ -17,21 +17,19 @@ import pandas as pd
 import smtplib
 
 MIN_DATE_STR = "2025-12-31"
+DAYS_TO_ADD = -3
+Y_SHEET1 = 'Sheet1'
+Y_SHEET2 = 'Sheet2'
+EMAIL_FROM_NAME = 'garrys64001@web.de'    
+EMAIL_FROM_PASSWORD = st.secrets.WEB_PASS  #В интерфейсе Streamlit Cloud: > Settings > Secrets > WEB_PASS=....     
+SMTP_NAME = 'smtp.web.de'
+SMTP_PORT = 465
 
 class OffenePostenProcessor(BaseProcessor):
 
     name = "OffenePosten Processor"
     
     EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    #MIN_DATE_STR = "2025-12-31"
-    DAYS_TO_ADD = -3
-    Y_SHEET1 = 'Sheet1'
-    Y_SHEET2 = 'Sheet2'
-    EMAIL_FROM_NAME = 'garrys64001@web.de'    
-    EMAIL_FROM_PASSWORD = st.secrets.WEB_PASS  #В интерфейсе Streamlit Cloud: > Settings > Secrets > WEB_PASS=....     
-    SMTP_NAME = 'smtp.web.de'
-    SMTP_PORT = 465
-
    
 #--------------------------
     def render_ui(self):
@@ -63,7 +61,7 @@ class OffenePostenProcessor(BaseProcessor):
 
         result, result_SPoint, kundeliste_sheets = self._prepare_data(Datendatei, Kundeliste)
         result = self._apply_email_editor(result, email_editor)
-        kundeliste_sheets[self.Y_SHEET1] = self._apply_email_editor(kundeliste_sheets[self.Y_SHEET1], email_editor)
+        kundeliste_sheets[Y_SHEET1] = self._apply_email_editor(kundeliste_sheets[Y_SHEET1], email_editor)
 
         #--- save output_files ----------------------------------------------------
         os.makedirs("results", exist_ok=True)
@@ -115,14 +113,14 @@ class OffenePostenProcessor(BaseProcessor):
                     protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
                     
                     msg = EmailMessage()
-                    msg['From'] = 'garrys64001@web.de' #self.EMAIL_FROM_NAME
+                    msg['From'] = EMAIL_FROM_NAME
                     msg['To'] = kunde_mail
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
                     context = ssl.create_default_context()
-                    with smtplib.SMTP_SSL('smtp.web.de', 465 , timeout=30, context=context) as server:
-                        server.login('garrys64001@web.de', st.secrets.WEB_PASS)              
+                    with smtplib.SMTP_SSL(SMTP_NAME, SMTP_PORT , timeout=30, context=context) as server:
+                        server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
                         server.send_message(msg)
                            
         return protocol
@@ -130,7 +128,7 @@ class OffenePostenProcessor(BaseProcessor):
 #--------------------------
     def _prepare_data(self, Datendatei, Kundeliste):
         
-        current_date = date.today() + timedelta(days=self.DAYS_TO_ADD)
+        current_date = date.today() + timedelta(days=DAYS_TO_ADD)
         min_date = datetime.strptime(MIN_DATE_STR, "%Y-%m-%d").date()
 
         #---Datendatei---------------------------------------------------------------------------------------------------
@@ -139,11 +137,11 @@ class OffenePostenProcessor(BaseProcessor):
         result = df[(df['Fälligkeit'].dt.date < current_date) & (df['Fälligkeit'].dt.date > min_date) & (df['Restbetrag'] > 0)]
 
         #---Kundeliste-----------------------------------------------------------------------------------------------------
-        dfY1 = pd.read_excel(Kundeliste, sheet_name=self.Y_SHEET1, header=0)
-        dfY2 = pd.read_excel(Kundeliste, sheet_name=self.Y_SHEET2, header=0)
+        dfY1 = pd.read_excel(Kundeliste, sheet_name=Y_SHEET1, header=0)
+        dfY2 = pd.read_excel(Kundeliste, sheet_name=Y_SHEET2, header=0)
         kundeliste_sheets = {
-            self.Y_SHEET1: dfY1.copy(),
-            self.Y_SHEET2: dfY2.copy(),
+            Y_SHEET1: dfY1.copy(),
+            Y_SHEET2: dfY2.copy(),
         }
 
         #---Bearbeitung-----------------------------------------------------------------------------------------------------
