@@ -120,7 +120,7 @@ class OffenePostenProcessor(BaseProcessor):
                     msg.set_content(html_body, subtype='html')
                     
                     with smtplib.SMTP_SSL(self.SMTP_NAME, 465) as server:
-                        server.login(self.EMAIL_FROM_NAME, self.EMAIL_FROM_PASSWORD)              
+                        server.login(self.EMAIL_FROM_NAME, st.secrets.WEB_PASS)              
                         server.send_message(msg)
                            
         return protocol
