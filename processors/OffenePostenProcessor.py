@@ -24,7 +24,7 @@ Y_SHEET2 = 'Sheet2'
 EMAIL_FROM_NAME = 'garrys64001@web.de'    
 EMAIL_FROM_PASSWORD = st.secrets.WEB_PASS  #В интерфейсе Streamlit Cloud: > Settings > Secrets > WEB_PASS=....     
 SMTP_NAME = 'smtp.web.de'
-SMTP_PORT = 587 #465
+SMTP_PORT = 465
 
 class OffenePostenProcessor(BaseProcessor):
 
