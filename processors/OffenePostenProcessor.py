@@ -113,6 +113,8 @@ class OffenePostenProcessor(BaseProcessor):
                 else:
                     protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
                     
+                    st.write({self.EMAIL_FROM_NAME}   {self.SMTP_NAME}   {self.SMTP_PORT}   )
+                    
                     msg = EmailMessage()
                     msg['From'] = self.EMAIL_FROM_NAME
                     msg['To'] = kunde_mail
@@ -177,7 +179,7 @@ class OffenePostenProcessor(BaseProcessor):
         recipients['Email_ok'] = recipients['Kunde_mail'].apply(self._is_valid_email)
 
         st.subheader("Email editor")
-        st.caption("Заполните или исправьте Kunde_mail перед отправкой. Исправления попадут в результат OP_Einstellungen_updated.")
+        st.caption("Are all email valid ?")
 
         edited = st.data_editor(
             recipients,
@@ -195,7 +197,7 @@ class OffenePostenProcessor(BaseProcessor):
         if invalid_count:
             st.warning(f"{invalid_count} invalid email")
         else:
-            st.success("All email are valid")
+            st.success("All email are valid !")
 
         return edited
         
