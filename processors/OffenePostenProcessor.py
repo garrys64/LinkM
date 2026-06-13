@@ -119,7 +119,7 @@ class OffenePostenProcessor(BaseProcessor):
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    with smtplib.SMTP_STARTTLS(SMTP_NAME, SMTP_PORT) as server:
+                    with smtplib.SMTP_SSL(SMTP_NAME, SMTP_PORT) as server:
                         server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
                         server.send_message(msg)
                            
