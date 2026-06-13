@@ -111,16 +111,16 @@ class OffenePostenProcessor(BaseProcessor):
                 if pd.isna(ms_html) or not str(ms_html).strip() or pd.isna(kunde_mail) or not str(kunde_mail).strip():                    
                     protocol.append([f'❌ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'warn: kunde_mail fehlt!'])
                 else:
-                    protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet'])                    
-                
+                    protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
+                    
                     msg = EmailMessage()
-                    msg['From'] = 'garrys64001@web.de'
+                    msg['From'] = self.EMAIL_FROM_NAME
                     msg['To'] = kunde_mail
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    with smtplib.SMTP_SSL('smtp.web.de', 465) as server:
-                        server.login('garrys64001@web.de', st.secrets.WEB_PASS)              
+                    with smtplib.SMTP_SSL(self.SMTP_NAME, self.SMTP_PORT) as server:
+                        server.login(self.EMAIL_FROM_NAME, self.EMAIL_FROM_PASSWORD)              
                         server.send_message(msg)
                            
         return protocol

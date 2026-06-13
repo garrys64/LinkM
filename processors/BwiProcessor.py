@@ -13,14 +13,12 @@ from pathlib import Path
 import html
 import re
 
-DEFAULT_PRICE = 0.063
-DEFAULT_GR = "LG 3"
-TEXT_GR = "Message Fees, BWI GmbH (SMS/bwi02/GwBw), SMS-Versand "
 
 class BwiProcessor(BaseProcessor):
 
     name = "BwiProcessor"
-
+    
+#--------------------------
     def render_ui(self):
 
         Datendatei = st.file_uploader("Datendatei",type=["xlsx","xls"])
@@ -31,6 +29,7 @@ class BwiProcessor(BaseProcessor):
             "Preisliste": Preisliste,
         }
 
+#--------------------------
     def process(self, data):
 
         datendatei = data["Datendatei"]
@@ -41,19 +40,21 @@ class BwiProcessor(BaseProcessor):
         DEFAULT_GR = "LG 3"
         TEXT_GR = "Message Fees, BWI GmbH (SMS/bwi02/GwBw), SMS-Versand "
 
-#---
-
+#--------------------------
         def normalize_country(value):
             return str(value or "").strip().casefold()
 
+#--------------------------
         def get_message_route(value):
             text = html.unescape(str(value or "")).strip()
             return re.sub(r"^\s*SMS-MT\s*/\s*", "", text, flags=re.IGNORECASE)
 
+#--------------------------
         def extract_country(value):
             route = get_message_route(value)
             return re.split(r"\s*-\s*", route, maxsplit=1)[0].strip()
 
+#--------------------------
         def extract_germany_price_key(value, germany_price_keys):
             route = get_message_route(value)
             parts = re.split(r"\s*-\s*", route, maxsplit=1)
@@ -70,14 +71,14 @@ class BwiProcessor(BaseProcessor):
 
             return "Germany"
 
-
+#--------------------------
         def get_price_key(value, germany_price_keys):
             country = extract_country(value)
             if normalize_country(country) == "germany":
                 return extract_germany_price_key(value, germany_price_keys)
             return country    
 
-#--------------------
+#--------------------------
      
         prices_df = pd.read_excel(preisliste)
         z1_df = pd.read_excel(datendatei,header=None,  nrows=4)   #заголовок первые 4 строки 
@@ -131,15 +132,10 @@ class BwiProcessor(BaseProcessor):
             sum_data_df.to_excel(writer, sheet_name='Report', index=False, startrow=start_row, startcol=4)
             start_row = start_row + 5
             total_sum_data_df.to_excel(writer, sheet_name='Report', index=False, startrow=start_row, startcol=4, header=False)
-#--------------------               
-
-#--           
-        
+     
         output_files.append(output_file)
 
         return output_files
 
-
-#----------------------------------------------------------
 
 

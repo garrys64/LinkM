@@ -30,9 +30,10 @@ class TollCollectProcessor(BaseProcessor):
         Datendatei = data["Datendatei"]
         Preisliste = data["Preisliste"]
         output_files = []
+        
+        col = "C"
 
-#---
-        phones_df = pd.read_excel(Datendatei)
+        phones_df = pd.read_excel(Datendatei, usecols=col, dtype=str)
         result = pd.read_excel(Preisliste)
         
         result.columns = ['code', 'country', 'price'] + list(result.columns[3:])
@@ -46,13 +47,12 @@ class TollCollectProcessor(BaseProcessor):
             phones_str = phones_str.str.replace(r'\D', '', regex=True)
             return phones_str
             
-        column_number = 2
-        cleaned_phones = clean_phone_series(phones_df.iloc[:, column_number])  
+        cleaned_phones = clean_phone_series(phones_df.iloc[:, 0])  
         code_list = sorted(result['code'].values, key=len, reverse=True)   
                
         def find_code(phone):
             if pd.isna(phone) or (isinstance(phone, str) and phone == ""):
-                return '0000'           # пропускаем пустые строки
+                return '0000'             # пропускаем пустые строки
             for code in code_list:
                 if phone.startswith(code):
                     return code
