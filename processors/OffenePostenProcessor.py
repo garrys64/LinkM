@@ -15,6 +15,7 @@ import re
 import uuid
 import pandas as pd
 import smtplib
+import ssl
 
 MIN_DATE_STR = "2025-12-31"
 DAYS_TO_ADD = -3
