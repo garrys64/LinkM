@@ -16,13 +16,14 @@ import uuid
 import pandas as pd
 import smtplib
 
+MIN_DATE_STR = "2025-12-31"
 
 class OffenePostenProcessor(BaseProcessor):
 
     name = "OffenePosten Processor"
     
     EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    MIN_DATE_STR = "2025-12-31"
+    #MIN_DATE_STR = "2025-12-31"
     DAYS_TO_ADD = -3
     Y_SHEET1 = 'Sheet1'
     Y_SHEET2 = 'Sheet2'
@@ -119,7 +120,8 @@ class OffenePostenProcessor(BaseProcessor):
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    with smtplib.SMTP_SSL('smtp.web.de', 465) as server:
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP_SSL('smtp.web.de', 465 , timeout=30, context=context) as server:
                         server.login('garrys64001@web.de', st.secrets.WEB_PASS)              
                         server.send_message(msg)
                            
@@ -129,7 +131,7 @@ class OffenePostenProcessor(BaseProcessor):
     def _prepare_data(self, Datendatei, Kundeliste):
         
         current_date = date.today() + timedelta(days=self.DAYS_TO_ADD)
-        min_date = datetime.strptime(self.MIN_DATE_STR, "%Y-%m-%d").date()
+        min_date = datetime.strptime(MIN_DATE_STR, "%Y-%m-%d").date()
 
         #---Datendatei---------------------------------------------------------------------------------------------------
         df = pd.read_excel(Datendatei, header=1)
