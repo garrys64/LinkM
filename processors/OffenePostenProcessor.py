@@ -114,13 +114,13 @@ class OffenePostenProcessor(BaseProcessor):
                     protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
                     
                     msg = EmailMessage()
-                    msg['From'] = self.EMAIL_FROM_NAME
+                    msg['From'] = 'garrys64001@web.de' #self.EMAIL_FROM_NAME
                     msg['To'] = kunde_mail
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    with smtplib.SMTP_SSL(self.SMTP_NAME, self.SMTP_PORT) as server:
-                        server.login(self.EMAIL_FROM_NAME, self.EMAIL_FROM_PASSWORD)              
+                    with smtplib.SMTP_SSL('smtp.web.de', 465) as server:
+                        server.login('garrys64001@web.de', st.secrets.WEB_PASS)              
                         server.send_message(msg)
                            
         return protocol
