@@ -49,11 +49,11 @@ if not st.session_state["logged_in"]:
     if st.button("Ok"):
     
 #В интерфейсе Streamlit Cloud: > Settings > Secrets > LIUDMILAS=....
-        #if password == st.secrets.LIUDMILAS:
-        st.session_state["logged_in"] = True
-        st.rerun()
-        #else:
-            #st.error("No")
+        if password == st.secrets.LIUDMILAS:
+            st.session_state["logged_in"] = True
+            st.rerun()
+        else:
+            st.error("No")
 
 else:
 #-----------
