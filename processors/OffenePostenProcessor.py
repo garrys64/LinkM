@@ -124,7 +124,8 @@ class OffenePostenProcessor(BaseProcessor):
                         #server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
                         #server.send_message(msg)
                     context = ssl.create_default_context()    
-                    with smtplib.SMTP(SMTP_NAME, SMTP_PORT, timeout=30, context=context) as server:  #587                        
+                    with smtplib.SMTP(SMTP_NAME, SMTP_PORT, timeout=30) as server:  #587                        
+                        server.starttls(context=context)
                         server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
                         server.send_message(msg)
                        
