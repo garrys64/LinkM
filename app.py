@@ -12,14 +12,12 @@ from processors.BaseProcessor import BaseProcessor
 from processors.TollCollectProcessor import TollCollectProcessor
 from processors.XmlProcessor import XmlProcessor
 from processors.WhatsappProcessor import WhatsappProcessor
-from processors.OffenePostenProcessor import OffenePostenProcessor
 from processors.BwiProcessor import BwiProcessor
 
 
 processors = [
     TollCollectProcessor(),
     XmlProcessor(),
-    OffenePostenProcessor(),
     WhatsappProcessor(),
     BwiProcessor(),
 ]
