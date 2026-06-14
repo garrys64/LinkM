@@ -24,7 +24,7 @@ Y_SHEET2 = 'Sheet2'
 EMAIL_FROM_NAME = 'garrys64001@web.de'    
 EMAIL_FROM_PASSWORD = st.secrets.WEB_PASS  #В интерфейсе Streamlit Cloud: > Settings > Secrets > WEB_PASS=....     
 SMTP_NAME = 'smtp.web.de'
-SMTP_PORT = 465
+SMTP_PORT = 587
 
 class OffenePostenProcessor(BaseProcessor):
 
@@ -88,40 +88,54 @@ class OffenePostenProcessor(BaseProcessor):
         
 #--------------------------        
     def _send_grouped_emails(self, result, data):                  
-        
+        try:
         #---Grouped_by_kto ---
         
-        grouped_by_kto = result.groupby('Kto.')
-        columns_to_include = ['Kto.-Name','Belegdat.','Fälligkeit','Belegnr.','OP-Betrag','Restbetrag']
+            grouped_by_kto = result.groupby('Kto.')
+            columns_to_include = ['Kto.-Name','Belegdat.','Fälligkeit','Belegnr.','OP-Betrag','Restbetrag']
 
-        #---Per alle Kto ---
-        
-        signature_htm = ''
-        protocol = []
-        
-        for kto, item in grouped_by_kto:  
-            if len(item) > 0:
-                
-        #---Mail---
-                table_html = build_table(item[columns_to_include], 'blue_dark', width='800px', font_size='small', font_family='Calibri')       
-                ms_html =  item['Mahn_Schreibung'].iloc[0].replace('\n', '<br>') if pd.notna(item['Mahn_Schreibung'].iloc[0]) else ''
-                kunde_mail = item['Kunde_mail'].iloc[0]       
-                html_body = f"""<html><head></head><body>{ms_html}<br><br><p>{table_html}<br><br></p>{signature_htm}</body></html>"""
-                
-                if pd.isna(ms_html) or not str(ms_html).strip() or pd.isna(kunde_mail) or not str(kunde_mail).strip():                    
-                    protocol.append([f'❌ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'warn: kunde_mail fehlt!'])
-                else:
-                    protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
+            #---Per alle Kto ---
+            
+            signature_htm = ''
+            protocol = []
+            
+            for kto, item in grouped_by_kto:  
+                if len(item) > 0:
                     
-                    msg = EmailMessage()
-                    msg['From'] = EMAIL_FROM_NAME
-                    msg['To'] = kunde_mail
-                    msg['Subject'] = 'subject'
-                    msg.set_content(html_body, subtype='html')
+            #---Mail---
+                    table_html = build_table(item[columns_to_include], 'blue_dark', width='800px', font_size='small', font_family='Calibri')       
+                    ms_html =  item['Mahn_Schreibung'].iloc[0].replace('\n', '<br>') if pd.notna(item['Mahn_Schreibung'].iloc[0]) else ''
+                    kunde_mail = item['Kunde_mail'].iloc[0]       
+                    html_body = f"""<html><head></head><body>{ms_html}<br><br><p>{table_html}<br><br></p>{signature_htm}</body></html>"""
                     
-                    with smtplib.SMTP_SSL(SMTP_NAME, SMTP_PORT) as server:
-                        server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
-                        server.send_message(msg)
+                    if pd.isna(ms_html) or not str(ms_html).strip() or pd.isna(kunde_mail) or not str(kunde_mail).strip():                    
+                        protocol.append([f'❌ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'warn: kunde_mail fehlt!'])
+                    else:
+                        protocol.append([f'✔️ {kto}', f'{item['Kto.-Name'].iloc[0]}', f'gesendet']) 
+                        
+                        msg = EmailMessage()
+                        msg['From'] = EMAIL_FROM_NAME
+                        msg['To'] = kunde_mail
+                        msg['Subject'] = 'subject'
+                        msg.set_content(html_body, subtype='html')
+                        
+                        #with smtplib.SMTP_SSL(SMTP_NAME, SMTP_PORT) as server:  #465
+                            #server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
+                            #server.send_message(msg)
+                            
+                        with smtplib.SMTP(SMTP_NAME, SMTP_PORT) as server:  #587
+                            context = ssl.create_default_context()
+                            server.starttls(context=context)
+                            server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
+                            server.send_message(msg)
+                            
+        except smtplib.SMTPException as e:
+            if smtplib.server is not None:
+                smtplib.server.quit()
+            st.error(f"{e}")
+        finally:
+            if smtplib.server is not None:
+                smtplib.server.quit()
                            
         return protocol
         
