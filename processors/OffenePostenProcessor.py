@@ -22,7 +22,7 @@ MIN_DATE_STR = "2025-12-31"
 DAYS_TO_ADD = -3
 Y_SHEET1 = 'Sheet1'
 Y_SHEET2 = 'Sheet2'
-EMAIL_FROM_NAME = 'garrys64@web.de'    
+EMAIL_FROM_NAME = 'garrys64001@web.de'    
 EMAIL_FROM_PASSWORD = st.secrets.WEB_PASS  #В интерфейсе Streamlit Cloud: > Settings > Secrets > WEB_PASS=....     
 SMTP_NAME = 'smtp.web.de'
 SMTP_PORT = 465
@@ -120,7 +120,7 @@ class OffenePostenProcessor(BaseProcessor):
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    server = smtplib.SMTP_SSL(SMTP_NAME, 465)
+                    server = smtplib.SMTP_SSL(SMTP_NAME, SMTP_PORT)
                     #server.starttls()
                     server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
                     server.send_message(msg)
