@@ -120,8 +120,8 @@ class OffenePostenProcessor(BaseProcessor):
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    server = smtplib.SMTP(SMTP_NAME, 587)
-                    server.starttls()
+                    server = smtplib.SMTP_SSL(SMTP_NAME, 465)
+                    #server.starttls()
                     server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
                     server.send_message(msg)
 
