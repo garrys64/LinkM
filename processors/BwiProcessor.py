@@ -101,7 +101,7 @@ class BwiProcessor(BaseProcessor):
         ]
 
         price_keys = data_df["Buchungstext"] .apply(lambda text: get_price_key(text, germany_price_keys))    
-        data_df["Einzelpreis"] = price_keys.apply(lambda price_key: (-1) * prices.get(normalize_country(price_key), (-1) * DEFAULT_PRICE))
+        data_df["Einzelpreis"] = price_keys.apply(lambda price_key: prices.get(normalize_country(price_key), DEFAULT_PRICE)) * (-1) 
         data_df["Gesamtpreis"] =data_df["Anzahl"]* data_df["Einzelpreis"]
         data_df["Bezeichnung"] = price_keys.apply(lambda price_key: f"{TEXT_GR}{groups.get(normalize_country(price_key), DEFAULT_GR)}")    
         data_df["Pos."] = range(1, len(data_df) + 1)
