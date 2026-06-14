@@ -12,6 +12,7 @@ from email.message import EmailMessage
 import streamlit as st
 import os
 import re
+import ssl
 import uuid
 import pandas as pd
 import smtplib
@@ -130,12 +131,10 @@ class OffenePostenProcessor(BaseProcessor):
                             server.send_message(msg)
                             
         except smtplib.SMTPException as e:
-            if smtplib.server is not None:
-                smtplib.server.quit()
             st.error(f"{e}")
-        finally:
-            if smtplib.server is not None:
-                smtplib.server.quit()
+        #finally:
+            #if smtplib.server is not None:
+                #smtplib.server.quit()
                            
         return protocol
         
