@@ -120,11 +120,11 @@ class OffenePostenProcessor(BaseProcessor):
                     msg['Subject'] = 'subject'
                     msg.set_content(html_body, subtype='html')
                     
-                    #context = ssl.create_default_context()     #587 
-                    with smtplib.SMTP(SMTP_NAME, SMTP_PORT, timeout=30) as server:                         
-                        #server.starttls(context=context)       #587 
-                        server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
-                        server.send_message(msg)
+                    server = smtplib.SMTP(SMTP_NAME, 587)
+                    server.starttls()
+                    server.login(EMAIL_FROM_NAME, EMAIL_FROM_PASSWORD)              
+                    server.send_message(msg)
+
                        
         return protocol
         
