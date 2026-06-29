@@ -54,9 +54,9 @@ class ValidatorXml_UBL(BaseProcessor):
             with open(file_path, 'wb') as f:
                 f.write(Datendatei.getvalue())
 
-            java = r"java"
+            java = "java"
             cmd = [java,"-jar",VALIDATOR_JAR,"-s", SCENARIOS, "-o", OUTPUT_DIR,  file_path]
-            result = subprocess.run(cmd, capture_output=True,  text=True)
+            result = subprocess.run(cmd, capture_output=True,  text=True, check = True)
             
             os.remove(file_path)
             
