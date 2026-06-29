@@ -20,7 +20,7 @@ SCENARIOS1 = Path("libs") / "10" / "scenarios.xml"
 SCENARIOS3 = Path("libs") / "30" / "scenarios.xml"
 
 
-class ValidatorXml_UBL(BaseProcessor):
+class ValidatorXml(BaseProcessor):
 
     name = "ValidatorXml"
 
