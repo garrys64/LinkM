@@ -47,11 +47,8 @@ class ValidatorXml_UBL(BaseProcessor):
         else:
             SCENARIOS = SCENARIOS1
 
-        file_path = OUTPUT_DIR / Datendatei.name.replace(' ', '_')
-        st.write(file_path)  
-        st.write(Datendatei.name.replace(' ', '_'))  
-        st.write(OUTPUT_DIR)  
-    
+        file_path = OUTPUT_DIR / Datendatei.name.replace(' ', '_').lower()
+       
         try:                                                              
             with open(file_path, 'wb') as f:
                 f.write(Datendatei.getvalue())
@@ -70,8 +67,7 @@ class ValidatorXml_UBL(BaseProcessor):
                                 
             name, ext = os.path.splitext(file_path) 
             report_filename = f"{name}-report{ext}"  
-            st.write(file_path) 
-            st.write(report_filename)     
+              
             if report_filename:
                 with open(report_filename, 'r', encoding='utf-8') as f:
                     xml_content = f.read()
