@@ -7,7 +7,7 @@
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
 import os
-import uuid
+import io
 import pandas as pd
 from pathlib import Path
 import html
@@ -32,8 +32,8 @@ class BwiProcessor(BaseProcessor):
 #--------------------------
     def process(self, data):
 
-        datendatei = data["Datendatei"]
-        preisliste = data["Preisliste"]
+        Datendatei = data["Datendatei"]
+        Preisliste = data["Preisliste"]
         output_files = []
                
         DEFAULT_PRICE = 0.063
@@ -80,10 +80,10 @@ class BwiProcessor(BaseProcessor):
 
 #--------------------------
      
-        prices_df = pd.read_excel(preisliste)
-        z1_df = pd.read_excel(datendatei,header=None,  nrows=4)   #заголовок первые 4 строки 
+        prices_df = pd.read_excel(Preisliste)
+        z1_df = pd.read_excel(Datendatei,header=None,  nrows=4)   #заголовок первые 4 строки 
         
-        data_df1 = pd.read_excel(datendatei, thousands='.', skiprows=4, header=0)   #пропускаем первые 4 строки               
+        data_df1 = pd.read_excel(Datendatei, thousands='.', skiprows=4, header=0)   #пропускаем первые 4 строки               
         data_df = data_df1.iloc[:-7]   #удаляем последние 7 строк
 
         prices = {
@@ -120,22 +120,22 @@ class BwiProcessor(BaseProcessor):
         # Порядок столбцов для вывода
         data_df = data_df[['Pos.', 'Buchungsart', 'Buchungstext', 'Produktcode', 'Bezeichnung', 'Anzahl', 'Einzelpreis', 'Gesamtpreis']]
 
-        os.makedirs("results", exist_ok=True)
-        output_file = f"results/BWI_{uuid.uuid4()}.xlsx"
-        
-        with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             z1_df.to_excel(writer, sheet_name='Report', index=False, startrow=0, startcol=0, header=False)
             data_df.to_excel(writer, sheet_name='Report', index=False, startrow=5, startcol=0)
-            
+
             # Добавляем отступ (например, 1 пустая строка)
-            start_row = len(data_df) + 2+5
+            start_row = len(data_df) + 2 + 5
             sum_data_df.to_excel(writer, sheet_name='Report', index=False, startrow=start_row, startcol=4)
             start_row = start_row + 5
             total_sum_data_df.to_excel(writer, sheet_name='Report', index=False, startrow=start_row, startcol=4, header=False)
-     
-        output_files.append(output_file)
 
-        return output_files
+        buffer.seek(0)
+        data = {"df": buffer,"filename":  f"result_{Datendatei.name}", "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+        
+
+        return data
 
 
 

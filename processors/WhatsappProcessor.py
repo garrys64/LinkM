@@ -7,7 +7,7 @@
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
 import os
-import uuid
+import io
 import pandas as pd
 import numpy as np
 import time
@@ -103,13 +103,15 @@ class WhatsappProcessor(BaseProcessor):
         #--------------------------------------------------------------------------------------------------------------
         #result2 = result2[result2['CHECK'] == 'Y']
 #---    
-        os.makedirs("results", exist_ok=True)
-        output_file = f"results/Whatsapp_{uuid.uuid4()}.xlsx"
-        result2.to_excel(output_file, index=False)
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            result2.to_excel(writer, index=False, sheet_name='Sheet1')
+       
+        buffer.seek(0)
+        data = {"df": buffer,"filename":  f"result_{Datendatei.name}", "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+        
 
-        output_files.append(output_file)
-
-        return output_files
+        return data
 
 
     

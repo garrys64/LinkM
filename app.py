@@ -13,6 +13,8 @@ from processors.TollCollectProcessor import TollCollectProcessor
 from processors.XmlProcessor import XmlProcessor
 from processors.WhatsappProcessor import WhatsappProcessor
 from processors.BwiProcessor import BwiProcessor
+from processors.ValidatorXml_UBL import ValidatorXml_UBL
+from processors.XmlConverter_CIItoUBL import XmlConverter_CIItoUBL
 
 
 processors = [
@@ -20,6 +22,8 @@ processors = [
     XmlProcessor(),
     WhatsappProcessor(),
     BwiProcessor(),
+    ValidatorXml_UBL(),
+    XmlConverter_CIItoUBL(),
 ]
 
 processor_dict = {
@@ -56,7 +60,7 @@ if not st.session_state["logged_in"]:
 else:
 #-----------
 
-    st.title("📊 Mein Processors")
+    st.header("📊 Mein Processors")
 
     st.write("Select a processor and upload the files")
 
@@ -108,26 +112,23 @@ else:
 
                 with st.spinner("Processing..."):
 
-                    result_files = processor.process(data)
-
-                # создаём zip в памяти
-                zip_buffer = io.BytesIO()
-
-                with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-                    for file_path in result_files:
-                        zipf.write(file_path, arcname=os.path.basename(file_path))
-                        os.remove(file_path)
+                    result = processor.process(data)
+                
 
                 st.success("Done!")
                 st.balloons()
                 
+                df = result["df"]
+                filename = result["filename"]
+                mime = result["mime"]
+
                 st.download_button(
                     label="📥 Download all results",
-                    data=zip_buffer,
-                    file_name="results.zip",
-                    mime="application/zip"
+                    data=df,
+                    file_name=filename,
+                    mime=mime
                 )
-                
+                            
         except Exception as e:
 
             st.error(f"Ошибка: {e}")

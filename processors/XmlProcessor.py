@@ -10,7 +10,7 @@ import os
 from lxml import etree
 import re
 from calendar import monthrange
-import uuid
+import io
 
 class XmlProcessor(BaseProcessor):
 
@@ -25,7 +25,7 @@ class XmlProcessor(BaseProcessor):
 
     def process(self, data):
 
-        xml_file = data["Datendatei"]
+        Datendatei = data["Datendatei"]
         #Preisliste = data["Preisliste"]
         output_files = []
 
@@ -33,7 +33,7 @@ class XmlProcessor(BaseProcessor):
       
         # Парсим XML (сохраняет nsmap как есть)
         parser = etree.XMLParser(remove_blank_text=False)
-        tree = etree.parse(xml_file, parser)
+        tree = etree.parse(Datendatei, parser)
         root = tree.getroot()
 
         ns = {
@@ -129,14 +129,15 @@ class XmlProcessor(BaseProcessor):
                             )
                         end_elem.text = enddate
 #---                
-   
-        os.makedirs("results", exist_ok=True)
-        output_file = f"results/XML_{uuid.uuid4()}.xml"
-        tree.write(output_file, encoding='utf-8', xml_declaration=True, pretty_print=False)
 
-        output_files.append(output_file)
+        
+        buffer = io.BytesIO()
+        buffer = etree.tostring(tree.getroot(), encoding='utf-8', xml_declaration=True)
+        data = {"df": buffer,"filename": f"result_{Datendatei.name}", "mime": "application/xml"}
+        
 
-        return output_files
+        return data
+
 
 
     
