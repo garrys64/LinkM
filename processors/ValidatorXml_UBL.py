@@ -48,7 +48,9 @@ class ValidatorXml_UBL(BaseProcessor):
             SCENARIOS = SCENARIOS1
 
         file_path = OUTPUT_DIR / Datendatei.name.replace(' ', '_')
-          
+        st.write(file_path)  
+        st.write(Datendatei.name.replace(' ', '_'))  
+        st.write(OUTPUT_DIR)  
     
         try:                                                              
             with open(file_path, 'wb') as f:
