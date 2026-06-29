@@ -68,7 +68,8 @@ class ValidatorXml_UBL(BaseProcessor):
                                 
             name, ext = os.path.splitext(file_path) 
             report_filename = f"{name}-report{ext}"  
-            
+            st.write(file_path) 
+            st.write(report_filename)     
             if report_filename:
                 with open(report_filename, 'r', encoding='utf-8') as f:
                     xml_content = f.read()
