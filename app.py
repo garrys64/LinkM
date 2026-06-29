@@ -13,7 +13,7 @@ from processors.TollCollectProcessor import TollCollectProcessor
 from processors.XmlProcessor import XmlProcessor
 from processors.WhatsappProcessor import WhatsappProcessor
 from processors.BwiProcessor import BwiProcessor
-from processors.ValidatorXml_UBL import ValidatorXml_UBL
+from processors.ValidatorXml import ValidatorXml
 from processors.XmlConverter_CIItoUBL import XmlConverter_CIItoUBL
 
 
@@ -22,7 +22,7 @@ processors = [
     XmlProcessor(),
     WhatsappProcessor(),
     BwiProcessor(),
-    ValidatorXml_UBL(),
+    ValidatorXml(),
     XmlConverter_CIItoUBL(),
 ]
 

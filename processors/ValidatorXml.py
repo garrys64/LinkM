@@ -1,6 +1,6 @@
 # =========================================================
 #
-# ValidatorXml_UBL 
+# ValidatorXml
 # 
 # =========================================================
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 OUTPUT_DIR = Path("results")
 PEPPOL3 = "Peppol BIS/POACC 3.0"
-EN16931 = "STANDARD EN 16931/Peppol 1.0"
+EN16931 = "STANDARD EN 16931/Peppol 1.0 (CII/UBL)"
 VALIDATOR_JAR = Path("libs") / "validator-1.6.2-standalone.jar"
 SCENARIOS1 = Path("libs") / "10" / "scenarios.xml"
 SCENARIOS3 = Path("libs") / "30" / "scenarios.xml"
@@ -22,12 +22,12 @@ SCENARIOS3 = Path("libs") / "30" / "scenarios.xml"
 
 class ValidatorXml_UBL(BaseProcessor):
 
-    name = "ValidatorXml_UBL"
+    name = "ValidatorXml"
 
     def render_ui(self):
 
                 
-        Datendatei = st.file_uploader("XML Datei in Format UBL", type=["xml"])
+        Datendatei = st.file_uploader("XML Datei", type=["xml"])
         profile_xml = st.selectbox("PROFILE",[EN16931, PEPPOL3])
         
         
