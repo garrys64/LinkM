@@ -674,7 +674,7 @@ class XmlConverter_CIItoUBL(BaseProcessor):
             buffer = ET.tostring(result.getroot(), encoding='utf-8', xml_declaration=True)   
             pre = "UBL_PEPPOL1_"
             if profile_xml == PEPPOL3: pre = "UBL_PEPPOL3_"
-            data = {"df": buffer,"filename": f"{pre}{Datendatei.name}.xml", "mime": "application/xml"}
+            data = {"df": buffer,"filename": f"{pre}{Datendatei.name}", "mime": "application/xml"}
             
 
             return data
