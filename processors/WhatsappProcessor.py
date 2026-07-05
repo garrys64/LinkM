@@ -86,7 +86,7 @@ class WhatsappProcessor(BaseProcessor):
         }).reset_index()
 
         #--------------------------------------------------------------------------------------------------------------
-        dfY2 = pd.read_excel(Preisliste, usecols=[2, 4, 5, 6, 11])
+        dfY2 = pd.read_excel(Preisliste, usecols=[2, 1, 5, 6, 11])
 
         #--------------------------------------------------------------------------------------------------------------
         result2= result2.merge(dfY2, on=['WABA'], how='left')
@@ -94,11 +94,11 @@ class WhatsappProcessor(BaseProcessor):
 
         #--------------------------------------------------------------------------------------------------------------
         # Порядок столбцов для вывода
-        result2 = result2[['CHECK', 'WABA_NAME', 'MESSAGES', 'AMOUNT', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)', 'TOTAL']]
+        result2 = result2[['COUNTRY', 'WABA_NAME', 'MESSAGES', 'AMOUNT', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)', 'TOTAL']]
 
         #--------------------------------------------------------------------------------------------------------------
         # Сортировка по одному или нескольким столбцам
-        result2 = result2.sort_values('WABA_NAME', ascending=[True])
+        result2 = result2.sort_values(['COUNTRY','WABA_NAME'], ascending=[True, True])
 
         #--------------------------------------------------------------------------------------------------------------
         #result2 = result2[result2['CHECK'] == 'Y']
