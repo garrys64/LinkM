@@ -33,7 +33,7 @@ class WhatsappProcessor(BaseProcessor):
         output_files = []
 
 #---
-        df = pd.read_excel(Datendatei, usecols=[5, 6, 7, 8, 14, 16])
+        df = pd.read_excel(Datendatei, usecols=['WABA', 'WABA_NAME', 'PRICING_CATEGORY', 'BUSINESS_PHONE_NO', 'MESSAGES', 'AMOUNT'])
                
 #####---NUR BUSINESS_PHONE_NO  = 4917688800103 ---заменить на нужный-------------------------------------------
         #condition = (df['BUSINESS_PHONE_NO'] == 4917688800103) 
@@ -89,7 +89,7 @@ class WhatsappProcessor(BaseProcessor):
         }).reset_index()
 
         #--------------------------------------------------------------------------------------------------------------
-        dfY = pd.read_excel(Preisliste, usecols=[0, 2, 7, 8])
+        dfY = pd.read_excel(Preisliste, usecols=['CUSTOMER_NAME', 'WABA', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE'])
         meta_long = dfY.melt(
             id_vars=['CUSTOMER_NAME','WABA'],
             var_name='PRICING_CATEGORY',
@@ -108,7 +108,7 @@ class WhatsappProcessor(BaseProcessor):
         }).reset_index()
 
         #--------------------------------------------------------------------------------------------------------------
-        dfY2 = pd.read_excel(Preisliste, usecols=[2, 1, 5, 6, 11])
+        dfY2 = pd.read_excel(Preisliste, usecols=['WABA', 'COUNTRY', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)'])
 
         #--------------------------------------------------------------------------------------------------------------
         result2= result2.merge(dfY2, on=['WABA'], how='left')
@@ -122,8 +122,7 @@ class WhatsappProcessor(BaseProcessor):
         # Сортировка по одному или нескольким столбцам
         result2 = result2.sort_values(['COUNTRY','CUSTOMER_NAME'], ascending=[True, True])
 
-        #--------------------------------------------------------------------------------------------------------------
-        #result2 = result2[result2['CHECK'] == 'Y']
+
 #---    
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
