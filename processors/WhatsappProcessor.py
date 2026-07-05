@@ -4,6 +4,8 @@
 # 
 # =========================================================
 
+REFERRAL_CONVERSION = True
+
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
 import os
@@ -60,30 +62,29 @@ class WhatsappProcessor(BaseProcessor):
       
                 
 #####------------------------------------------------------------------------------------------------------
-        #### OHNE REFERRAL_CONVERSION      
+        if REFERRAL_CONVERSION:
+#### mit referral_conversion 
+         
+            df['PRICING_CATEGORY'] = np.where(df['PRICING_CATEGORY'] == 'service', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE')
+        else:
+#### ohne referral_conversion      
         
-        conditions = [
-            df['PRICING_CATEGORY'] == 'service',
-            df['PRICING_CATEGORY'] == 'referral_conversion'
-        ]
+            conditions = [
+                df['PRICING_CATEGORY'] == 'service',
+                df['PRICING_CATEGORY'] == 'referral_conversion'
+            ]
 
-        choices = [
-            'GEBUR_SERVICE',
-            'GEBUR_referral_conversion'
-        ]
+            choices = [
+                'GEBUR_SERVICE',
+                'GEBUR_referral_conversion'
+            ]
 
-        df['PRICING_CATEGORY'] = np.select(conditions, choices, default='GEBUR_TEMPLATE')
+            df['PRICING_CATEGORY'] = np.select(conditions, choices, default='GEBUR_TEMPLATE')
         
 #####------------------------------------------------------------------------------------------------------
-        #### MIT REFERRAL_CONVERSION  
-        
-        #df['PRICING_CATEGORY'] = np.where(df['PRICING_CATEGORY'] == 'service', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE')
 
-#####------------------------------------------------------------------------------------------------------              
-
-
+                 
         result = df.groupby(['WABA', 'PRICING_CATEGORY']).agg({
-            #'WABA_NAME': 'first',  # или 'last'
             'MESSAGES': 'sum',
             'AMOUNT': 'sum'   
         }).reset_index()
