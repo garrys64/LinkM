@@ -97,7 +97,7 @@ class WhatsappProcessor(BaseProcessor):
         )
 
         #--------------------------------------------------------------------------------------------------------------
-        result= result.merge(meta_long, on=['WABA', 'PRICING_CATEGORY'], how='left')
+        result= result.merge(meta_long, on=['WABA', 'PRICING_CATEGORY'], how='right')
         result['AMOUNT'] = result['AMOUNT'] +result['MESSAGES'].fillna(0) * result['meta_value'].fillna(0)
 
         #--------------------------------------------------------------------------------------------------------------
