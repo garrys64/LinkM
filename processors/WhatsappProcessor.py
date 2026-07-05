@@ -57,19 +57,41 @@ class WhatsappProcessor(BaseProcessor):
                 #df.loc[idx, 'AMOUNT'] = 0
                 #remaining -= decrease               
 #####--------------------------------------------------------------------------------------------------------------------------------------
-              
-        df['PRICING_CATEGORY'] = np.where(df['PRICING_CATEGORY'] == 'service', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE')
+      
+                
+#####------------------------------------------------------------------------------------------------------
+        #### OHNE REFERRAL_CONVERSION      
+        
+        conditions = [
+            df['PRICING_CATEGORY'] == 'service',
+            df['PRICING_CATEGORY'] == 'referral_conversion'
+        ]
+
+        choices = [
+            'GEBUR_SERVICE',
+            'GEBUR_referral_conversion'
+        ]
+
+        df['PRICING_CATEGORY'] = np.select(conditions, choices, default='GEBUR_TEMPLATE')
+        
+#####------------------------------------------------------------------------------------------------------
+        #### MIT REFERRAL_CONVERSION  
+        
+        #df['PRICING_CATEGORY'] = np.where(df['PRICING_CATEGORY'] == 'service', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE')
+
+#####------------------------------------------------------------------------------------------------------              
+
 
         result = df.groupby(['WABA', 'PRICING_CATEGORY']).agg({
-            'WABA_NAME': 'first',  # или 'last'
+            #'WABA_NAME': 'first',  # или 'last'
             'MESSAGES': 'sum',
             'AMOUNT': 'sum'   
         }).reset_index()
 
         #--------------------------------------------------------------------------------------------------------------
-        dfY = pd.read_excel(Preisliste, usecols=[2, 7, 8])
+        dfY = pd.read_excel(Preisliste, usecols=[0, 2, 7, 8])
         meta_long = dfY.melt(
-            id_vars='WABA',
+            id_vars=['CUSTOMER_NAME','WABA'],
             var_name='PRICING_CATEGORY',
             value_name='meta_value'
         )
@@ -80,7 +102,7 @@ class WhatsappProcessor(BaseProcessor):
 
         #--------------------------------------------------------------------------------------------------------------
         result2 = result.groupby(['WABA']).agg({
-            'WABA_NAME': 'first', 
+            'CUSTOMER_NAME': 'first', 
             'MESSAGES': 'sum',
             'AMOUNT': 'sum'   
         }).reset_index()
@@ -94,11 +116,11 @@ class WhatsappProcessor(BaseProcessor):
 
         #--------------------------------------------------------------------------------------------------------------
         # Порядок столбцов для вывода
-        result2 = result2[['COUNTRY', 'WABA_NAME', 'MESSAGES', 'AMOUNT', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)', 'TOTAL']]
+        result2 = result2[['COUNTRY', 'CUSTOMER_NAME', 'MESSAGES', 'AMOUNT', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)', 'TOTAL']]
 
         #--------------------------------------------------------------------------------------------------------------
         # Сортировка по одному или нескольким столбцам
-        result2 = result2.sort_values(['COUNTRY','WABA_NAME'], ascending=[True, True])
+        result2 = result2.sort_values(['COUNTRY','CUSTOMER_NAME'], ascending=[True, True])
 
         #--------------------------------------------------------------------------------------------------------------
         #result2 = result2[result2['CHECK'] == 'Y']
