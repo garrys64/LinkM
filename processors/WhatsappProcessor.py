@@ -62,7 +62,6 @@ class WhatsappProcessor(BaseProcessor):
       
                 
 #####------------------------------------------------------------------------------------------------------
-        st.write(REFERRAL_CONVERSION)
         if REFERRAL_CONVERSION:
 #### mit referral_conversion 
          
