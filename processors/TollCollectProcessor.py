@@ -29,7 +29,6 @@ class TollCollectProcessor(BaseProcessor):
 
         Datendatei = data["Datendatei"]
         Preisliste = data["Preisliste"]
-        output_files = []
         
         col = "C"
 

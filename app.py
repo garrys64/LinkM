@@ -3,10 +3,6 @@
 # =========================================================
 
 import streamlit as st
-import os
-import io
-import zipfile
-import tempfile
 
 from processors.BaseProcessor import BaseProcessor
 from processors.TollCollectProcessor import TollCollectProcessor
@@ -15,6 +11,7 @@ from processors.WhatsappProcessor import WhatsappProcessor
 from processors.BwiProcessor import BwiProcessor
 from processors.ValidatorXml import ValidatorXml
 from processors.XmlConverter_CIItoUBL import XmlConverter_CIItoUBL
+from processors.AnhangPDFausXML import AnhangPDFausXML
 
 
 processors = [
@@ -24,6 +21,7 @@ processors = [
     BwiProcessor(),
     ValidatorXml(),
     XmlConverter_CIItoUBL(),
+    AnhangPDFausXML(),
 ]
 
 processor_dict = {
