@@ -33,6 +33,9 @@ class AnhangPDFausXML(BaseProcessor):
 
         # AttachmentBinaryObject с mimeCode="application/pdf"
         nodes = root.xpath("//ram:AttachmentBinaryObject[@mimeCode='application/pdf']", namespaces=ns)
+        if not nodes:
+            raise RuntimeError("Anhang nicht gefunden")
+            
         node = nodes[0]
         buffer = io.BytesIO(base64.b64decode(node.text.strip()))   
         buffer.seek(0)
