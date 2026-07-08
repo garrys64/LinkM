@@ -6,14 +6,13 @@
 
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
-import os
 import io
 import pandas as pd
 
 
 class TollCollectProcessor(BaseProcessor):
 
-    name = "TollCollect Processor"
+    name = "TollCollect"
 
     def render_ui(self):
 

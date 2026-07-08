@@ -16,7 +16,7 @@ import re
 
 class BwiProcessor(BaseProcessor):
 
-    name = "Bwi Processor"
+    name = "BWI"
     
 #--------------------------
     def render_ui(self):

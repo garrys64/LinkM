@@ -12,7 +12,7 @@ import io
 
 class AnhangPDFausXML(BaseProcessor):
 
-    name = "Anhang PDF aus XML"
+    name = "Anhang PDF aus XML (nur XRechnung)"
 
     def render_ui(self):
 
