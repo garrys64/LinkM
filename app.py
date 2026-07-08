@@ -12,6 +12,7 @@ from processors.BwiProcessor import BwiProcessor
 from processors.ValidatorXml import ValidatorXml
 from processors.XmlConverter_CIItoUBL import XmlConverter_CIItoUBL
 from processors.pdf_Samlung_new import pdf_Samlung_new
+from processors.AnhangPDFausXML import AnhangPDFausXML
 
 
 processors = [
@@ -22,6 +23,7 @@ processors = [
     ValidatorXml(),
     XmlConverter_CIItoUBL(),
     pdf_Samlung_new(),
+    AnhangPDFausXML(),
 ]
 
 processor_dict = {
