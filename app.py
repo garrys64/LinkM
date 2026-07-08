@@ -60,9 +60,9 @@ if not st.session_state["logged_in"]:
 else:
 #-----------
 
-    st.header("📊 Mein Processors")
+    st.sidebar.header("📊 Mein Processors")
 
-    st.write("Select a processor and upload the files")
+    st.write("**Select a processor and upload the files**   :sunglasses:")
 
 
     # =========================================================
