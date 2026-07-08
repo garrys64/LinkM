@@ -39,6 +39,7 @@ class AnhangPDFausXML(BaseProcessor):
         node = nodes[0]
         buffer = io.BytesIO(base64.b64decode(node.text.strip()))   
         buffer.seek(0)
+        st.pdf(buffer, height=800)
         data = {"df": buffer,"filename":  f"result_{Datendatei.name}.pdf", "mime": "application/pdf"}
         
 

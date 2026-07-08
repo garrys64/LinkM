@@ -13,25 +13,25 @@ import pikepdf
 
 class pdf_Samlung_new(BaseProcessor):
 
-    name = "pdf_Samlung_new"
+    name = "PDFs Samlung (ZUGFeRD + Anhangs)"
 
     def render_ui(self):
 
-        ZugFerd = st.file_uploader("ZugFerd datei",type=["pdf"])
-        Anhangs = st.file_uploader("Anhangs dateien",type=["pdf"], accept_multiple_files=True)
+        ZUGFeRD = st.file_uploader("ZUGFeRD Datei",type=["pdf"])
+        Anhangs = st.file_uploader("Anhangs Dateien",type=["pdf"], accept_multiple_files=True)
         
         return {
-            "ZugFerd": ZugFerd,
+            "ZUGFeRD": ZUGFeRD,
             "Anhangs": Anhangs,
         }
 
     def process(self, data):
 
-        ZugFerd = data["ZugFerd"]
+        ZUGFeRD = data["ZUGFeRD"]
         Anhangs = data["Anhangs"]
         
         combined_pdf = pikepdf.Pdf.new()
-        with pikepdf.open(ZugFerd) as src_pdf:
+        with pikepdf.open(ZUGFeRD) as src_pdf:
             combined_pdf.pages.extend(src_pdf.pages)
         for file in Anhangs:
             # Открываем каждый файл в байтовом буфере
@@ -43,7 +43,7 @@ class pdf_Samlung_new(BaseProcessor):
         buffer = BytesIO()
         combined_pdf.save(buffer)
         buffer.seek(0)
-        data = {"df": buffer,"filename":  f"mitAnhang_{ZugFerd.name}", "mime": "application/pdf"}
+        data = {"df": buffer,"filename":  f"mitAnhang_{ZUGFeRD.name}", "mime": "application/pdf"}
         
 
         return data
