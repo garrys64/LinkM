@@ -11,7 +11,7 @@ from processors.WhatsappProcessor import WhatsappProcessor
 from processors.BwiProcessor import BwiProcessor
 from processors.ValidatorXml import ValidatorXml
 from processors.XmlConverter_CIItoUBL import XmlConverter_CIItoUBL
-from processors.AnhangPDFausXML import AnhangPDFausXML
+from processors.pdf_Samlung_new import pdf_Samlung_new
 
 
 processors = [
@@ -21,7 +21,7 @@ processors = [
     BwiProcessor(),
     ValidatorXml(),
     XmlConverter_CIItoUBL(),
-    AnhangPDFausXML(),
+    pdf_Samlung_new(),
 ]
 
 processor_dict = {

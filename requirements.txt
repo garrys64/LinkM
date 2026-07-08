@@ -5,3 +5,4 @@ lxml
 pretty_html_table
 openpyxl
 xlrd==2.0.1
+pikepdf
