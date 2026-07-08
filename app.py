@@ -69,7 +69,7 @@ else:
     # PROCESSOR SELECT
     # =========================================================
 
-    selected_processor_name = st.selectbox(
+    selected_processor_name = st.sidebar.selectbox(
         "Processor",
         list(processor_dict.keys())
     )
