@@ -1,12 +1,11 @@
 # =========================================================
 #
-# PROCESSOR XmlProcessor
+# PROCESSOR Xml(Siemens)Processor
 # 
 # =========================================================
 
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
-import os
 from lxml import etree
 import re
 from calendar import monthrange
@@ -14,20 +13,17 @@ import io
 
 class XmlProcessor(BaseProcessor):
 
-    name = "Xml Processor"
+    name = "Xml (Siemens)"
 
     def render_ui(self):
 
         Datendatei = st.file_uploader("Datendatei", type=["xml"])
-        #Preisliste = st.file_uploader("Preisliste", type=["xlsx","xlsm"])
         
         return {"Datendatei": Datendatei}
 
     def process(self, data):
 
         Datendatei = data["Datendatei"]
-        #Preisliste = data["Preisliste"]
-        output_files = []
 
 #---
       
