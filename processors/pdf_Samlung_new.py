@@ -13,7 +13,7 @@ import pikepdf
 
 class pdf_Samlung_new(BaseProcessor):
 
-    name = "pdf_Samlung_new Processor"
+    name = "pdf_Samlung_new"
 
     def render_ui(self):
 

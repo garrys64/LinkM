@@ -16,14 +16,14 @@ from processors.AnhangPDFausXML import AnhangPDFausXML
 
 
 processors = [
+    pdf_Samlung_new(),
     TollCollectProcessor(),
-    XmlProcessor(),
-    WhatsappProcessor(),
     BwiProcessor(),
+    XmlProcessor(),
+    AnhangPDFausXML(),
     ValidatorXml(),
     XmlConverter_CIItoUBL(),
-    pdf_Samlung_new(),
-    AnhangPDFausXML(),
+    WhatsappProcessor(),
 ]
 
 processor_dict = {
