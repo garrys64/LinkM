@@ -31,7 +31,7 @@ class pdf_Samlung_new(BaseProcessor):
         Anhangs = data["Anhangs"]
         
         combined_pdf = pikepdf.Pdf.new()
-        with pikepdf.open(ZUGFeRD) as src_pdf:
+        with pikepdf.open(ZUGFeRD, allow_overwriting_input=True) as src_pdf:
             combined_pdf.pages.extend(src_pdf.pages)
         for file in Anhangs:
             # Открываем каждый файл в байтовом буфере
