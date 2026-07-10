@@ -33,11 +33,11 @@ class pdf_Samlung_new(BaseProcessor):
         #combined_pdf = pikepdf.Pdf.new()
         with pikepdf.open(ZUGFeRD) as src_pdf:
             #combined_pdf.pages.extend(src_pdf.pages)
-        for file in Anhangs:
-            # Открываем каждый файл в байтовом буфере
-            with pikepdf.open(file) as src_pdf2:
-                # Добавляем все страницы из текущего файла в объединённый
-                src_pdf.pages.extend(src_pdf2.pages)
+            for file in Anhangs:
+                # Открываем каждый файл в байтовом буфере
+                with pikepdf.open(file) as src_pdf2:
+                    # Добавляем все страницы из текущего файла в объединённый
+                    src_pdf.pages.extend(src_pdf2.pages)
 
         # Сохраняем результат в BytesIO, чтобы отдать через st.download_button
         buffer = BytesIO()
