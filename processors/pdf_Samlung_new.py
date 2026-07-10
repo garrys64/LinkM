@@ -29,31 +29,16 @@ class pdf_Samlung_new(BaseProcessor):
 
         ZUGFeRD = data["ZUGFeRD"]
         Anhangs = data["Anhangs"]
-        
-        combined_pdf = pikepdf.Pdf.new()
-        with pikepdf.open(ZUGFeRD) as src_pdf:
-            combined_pdf.pages.extend(src_pdf.pages)
-            # Копируем структуру Names (включая EmbeddedFiles) целиком
-            if src_pdf.root.Names:
-                combined.root.Names = src_pdf.root.Names
 
-            # Копируем XMP
-            with src_pdf.open_metadata() as meta_src:
-                with combined.open_metadata(readonly=False) as meta_dst:
-                    meta_dst.packet = meta_src.packet
+        with pikepdf.open(ZUGFeRD) as combined_pdf:
 
-        with pikepdf.open(ZUGFeRD) as src:
-        combined.pages.extend(src.pages)
+            for file in Anhangs:
+                with pikepdf.open(file) as src_pdf:
+                    combined_pdf.pages.extend(src_pdf.pages)
 
-        for file in Anhangs:
-            # Открываем каждый файл в байтовом буфере
-            with pikepdf.open(file) as add_src_pdf:
-                # Добавляем все страницы из текущего файла в объединённый
-                combined_pdf.pages.extend(add_src_pdf.pages)
+            buffer = BytesIO()
+            combined_pdf.save(buffer)
 
-        # Сохраняем результат в BytesIO, чтобы отдать через st.download_button
-        buffer = BytesIO()
-        combined_pdf.save(buffer)
         buffer.seek(0)
         data = {"df": buffer,"filename":  f"mitAnhang_{ZUGFeRD.name}", "mime": "application/pdf"}
         
