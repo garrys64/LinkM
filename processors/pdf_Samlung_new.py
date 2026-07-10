@@ -33,15 +33,10 @@ class pdf_Samlung_new(BaseProcessor):
         combined_pdf = pikepdf.Pdf.new()
         with pikepdf.open(ZUGFeRD) as src_pdf:
             combined_pdf.pages.extend(src_pdf.pages)
-        for file in Anhangs:
-            # Открываем каждый файл в байтовом буфере
-            with pikepdf.open(file) as src_pdf:
-                # Добавляем все страницы из текущего файла в объединённый
-                combined_pdf.pages.extend(src_pdf.pages)
-
+        
         # Сохраняем результат в BytesIO, чтобы отдать через st.download_button
         buffer = BytesIO()
-        ZUGFeRD.save(buffer)
+        combined_pdf.save(buffer)
         buffer.seek(0)
         data = {"df": buffer,"filename":  f"mitAnhang_{ZUGFeRD.name}", "mime": "application/pdf"}
         
