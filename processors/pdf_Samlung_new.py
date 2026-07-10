@@ -36,9 +36,8 @@ class pdf_Samlung_new(BaseProcessor):
                 with pikepdf.open(file) as src_pdf:
                     combined_pdf.pages.extend(src_pdf.pages)
 
-            buffer = BytesIO()
-            combined_pdf.save(buffer)
-
+        buffer = BytesIO()
+        combined_pdf.save(buffer)
         buffer.seek(0)
         data = {"df": buffer,"filename":  f"mitAnhang_{ZUGFeRD.name}", "mime": "application/pdf"}
         
