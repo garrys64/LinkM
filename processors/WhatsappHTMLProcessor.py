@@ -33,7 +33,7 @@ class WhatsappHTMLProcessor(BaseProcessor):
         }
 
     def process(self, data):
-        e_time = time.time()  # Засекаем время начала 
+        e_time = time.time()  
 
 
         Datendatei = data["Datendatei"]
