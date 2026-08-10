@@ -33,8 +33,7 @@ class WhatsappHTMLProcessor(BaseProcessor):
         Preisliste = data["Preisliste"]
         
         xFormat = "HTML"
-        
-        zip_buffer = BytesIO()
+
 
 #---
         #df = pd.read_parquet(Datendatei)
