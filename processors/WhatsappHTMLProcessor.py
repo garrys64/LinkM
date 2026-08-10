@@ -5,14 +5,11 @@
 # =========================================================
 
 #pip install python-calamine
-from weasyprint import HTML
-import time
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
 from io import BytesIO
 import pandas as pd
 from html import escape
-import zipfile
 
 
 class WhatsappHTMLProcessor(BaseProcessor):
@@ -24,21 +21,18 @@ class WhatsappHTMLProcessor(BaseProcessor):
         Datendatei = st.file_uploader("Datendatei", type=["xlsx"])
         Preisliste = st.file_uploader("Preisliste", type=["xlsx","xlsm"])
         
-        xFormat = st.radio("Format:", ["HTML", "PDF", "ZIP"])
         
         return {
             "Datendatei": Datendatei,
             "Preisliste": Preisliste,
-            "xFormat": xFormat,
         }
 
     def process(self, data):
-        e_time = time.time()  
-
 
         Datendatei = data["Datendatei"]
         Preisliste = data["Preisliste"]
-        xFormat = data["xFormat"]
+        
+        xFormat = "HTML"
         
         zip_buffer = BytesIO()
 
@@ -202,7 +196,7 @@ class WhatsappHTMLProcessor(BaseProcessor):
 
                 """
 
-                if xFormat == "HTML" or xFormat == "ZIP":
+                if xFormat == "HTML":
                 # ---------- CATEGORY ----------
 
                     for category, cat_df in waba_df.groupby("PRICING_CATEGORY"):
@@ -261,13 +255,9 @@ class WhatsappHTMLProcessor(BaseProcessor):
                 </body>
                 </html>
                 """
-                if xFormat == "ZIP":
-                    buffer = BytesIO()
-                    HTML(string=html.encode("utf-8")).write_pdf(buffer)
-                    zip_file.writestr(f"{waba_name}.pdf", buffer.getvalue())
-                    html = html0
+
                 
-            if xFormat == "HTML" or xFormat == "PDF":
+            if xFormat == "HTML":
                 html += f"""
                 <div style="display: grid; grid-template-columns: 215px 50px 75px 75px 50px 50px 30px 80px; font-weight: bold; background-color: #f0f0f0; border-top: 2px solid #333;">
                     <span style="text-align: left;">GESAMT</span>
@@ -288,18 +278,7 @@ class WhatsappHTMLProcessor(BaseProcessor):
                     buffer.seek(0)
                     data = {"df": buffer,"filename":  f"{Datendatei.name}.html", "mime": "text/html; charset=utf-8"}
                     
-                if xFormat == "PDF":
-                    buffer = BytesIO()
-                    HTML(string=html.encode("utf-8")).write_pdf(buffer)
-                    buffer.seek(0)
-                    data = {"df": buffer,"filename":  f"{Datendatei.name}.pdf", "mime": "application/pdf"}
-                           
-                    
-            if xFormat == "ZIP":
-                buffer.seek(0)
-                data = {"df": zip_buffer, "filename":  f"{Datendatei.name}.zip", "mime": "application/zip"}
-            
-            st.write(f"Time : {time.time() - e_time:.2f}" )
+
 
         return data
 

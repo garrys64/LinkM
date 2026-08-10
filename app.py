@@ -8,7 +8,7 @@ from processors.BaseProcessor import BaseProcessor
 from processors.TollCollectProcessor import TollCollectProcessor
 from processors.XmlProcessor import XmlProcessor
 from processors.WhatsappProcessor import WhatsappProcessor
-#from processors.WhatsappHTMLProcessor import WhatsappHTMLProcessor
+from processors.WhatsappHTMLProcessor import WhatsappHTMLProcessor
 
 from processors.BwiProcessor import BwiProcessor
 from processors.ValidatorXml import ValidatorXml
@@ -26,7 +26,7 @@ processors = [
     ValidatorXml(),
     XmlConverter_CIItoUBL(),
     WhatsappProcessor(),
-#    WhatsappHTMLProcessor(),    
+    WhatsappHTMLProcessor(),    
 ]
 
 processor_dict = {
