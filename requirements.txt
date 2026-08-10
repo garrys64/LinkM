@@ -8,5 +8,4 @@ xlrd==2.0.1
 pikepdf
 streamlit[pdf]
 python-calamine
-weasyprint
-HTML                                             
+                                            
