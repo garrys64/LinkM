@@ -12,7 +12,7 @@ import pandas as pd
 
 class TollCollectProcessor(BaseProcessor):
 
-    name = "TollCollect"
+    name = "TollCollect Processor"
 
     def render_ui(self):
 
@@ -31,8 +31,8 @@ class TollCollectProcessor(BaseProcessor):
         
         col = "C"
 
-        phones_df = pd.read_excel(Datendatei, usecols=col, dtype=str)
-        result = pd.read_excel(Preisliste)
+        phones_df = pd.read_excel(Datendatei, usecols=col, dtype=str, engine="calamine" )
+        result = pd.read_excel(Preisliste, engine="calamine")
         
         result.columns = ['code', 'country', 'price'] + list(result.columns[3:])
         result['code'] = result['code'].astype(str)

@@ -8,6 +8,8 @@ from processors.BaseProcessor import BaseProcessor
 from processors.TollCollectProcessor import TollCollectProcessor
 from processors.XmlProcessor import XmlProcessor
 from processors.WhatsappProcessor import WhatsappProcessor
+from processors.WhatsappHTMLProcessor import WhatsappHTMLProcessor
+
 from processors.BwiProcessor import BwiProcessor
 from processors.ValidatorXml import ValidatorXml
 from processors.XmlConverter_CIItoUBL import XmlConverter_CIItoUBL
@@ -16,14 +18,15 @@ from processors.AnhangPDFausXML import AnhangPDFausXML
 
 
 processors = [
-    pdf_Samlung_new(),
     TollCollectProcessor(),
     BwiProcessor(),
-    XmlProcessor(),
+    XmlProcessor(),    
+    pdf_Samlung_new(),    
     AnhangPDFausXML(),
     ValidatorXml(),
     XmlConverter_CIItoUBL(),
     WhatsappProcessor(),
+    WhatsappHTMLProcessor(),    
 ]
 
 processor_dict = {
@@ -43,21 +46,7 @@ st.set_page_config(
 )
 
 #----------- 
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-
-if not st.session_state["logged_in"]:
-    password = st.text_input("Pass(1)", type="password")
-    if st.button("Ok"):
-    
-#В интерфейсе Streamlit Cloud: > Settings > Secrets > LIUDMILAS=....
-        if password == st.secrets.LIUDMILAS:
-            st.session_state["logged_in"] = True
-            st.rerun()
-        else:
-            st.error("No")
-
-else:
+if True:
 #-----------
 
     st.sidebar.header("📊 Mein Processors")
@@ -69,9 +58,9 @@ else:
     # PROCESSOR SELECT
     # =========================================================
 
-    selected_processor_name = st.sidebar.selectbox(
+    selected_processor_name = st.sidebar.pills(
         "Processor",
-        list(processor_dict.keys())
+        list(processor_dict.keys()),default = list(processor_dict.keys())[0]
     )
 
     processor = processor_dict[selected_processor_name]

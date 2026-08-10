@@ -371,8 +371,7 @@ class XmlConverter_CIItoUBL(BaseProcessor):
                     return
                 order_id = text(agreement, "ram:BuyerOrderReferencedDocument/ram:IssuerAssignedID")
                 if order_id:
-                    order = cac(parent, "OrderReference")
-                    cbc(order, "ID", order_id)
+                    order = cbc(parent, "BuyerReference", order_id)  # new
 
                 contract_id = text(agreement, "ram:ContractReferencedDocument/ram:IssuerAssignedID")
                 if contract_id:
@@ -384,8 +383,17 @@ class XmlConverter_CIItoUBL(BaseProcessor):
                     if doc_id:
                         ref = cac(parent, "AdditionalDocumentReference")
                         cbc(ref, "ID", doc_id)
-                        add_if_text(ref, cbc, "DocumentTypeCode", text(doc, "ram:TypeCode"))
+                        #add_if_text(ref, cbc, "DocumentTypeCode", text(doc, "ram:TypeCode"))
                         add_if_text(ref, cbc, "DocumentDescription", text(doc, "ram:Name"))
+                        attachment_binary = first(doc, ["ram:AttachmentBinaryObject"])
+                        if attachment_binary is not None and attachment_binary.text:
+                            attachment = cac(ref, "Attachment")
+                            attrs = {}
+                            for cii_attr, ubl_attr in (("mimeCode", "mimeCode"), ("filename", "filename")):
+                                if attachment_binary.attrib.get(cii_attr):
+                                    attrs[ubl_attr] = attachment_binary.attrib[cii_attr]
+                            cbc(attachment, "EmbeddedDocumentBinaryObject", attachment_binary.text.strip(), **attrs)
+                                  
 
 
             def add_delivery(parent: ET.Element, delivery: ET.Element | None) -> None:

@@ -35,7 +35,7 @@ class WhatsappProcessor(BaseProcessor):
         output_files = []
 
 #---
-        df = pd.read_excel(Datendatei, usecols=['WABA', 'WABA_NAME', 'PRICING_CATEGORY', 'BUSINESS_PHONE_NO', 'MESSAGES', 'AMOUNT'])
+        df = pd.read_excel(Datendatei, usecols=['WABA', 'WABA_NAME', 'PRICING_CATEGORY', 'BUSINESS_PHONE_NO', 'MESSAGES', 'AMOUNT'], engine="calamine")
                
 #####---NUR BUSINESS_PHONE_NO  = 4917688800103 ---заменить на нужный-------------------------------------------
         #condition = (df['BUSINESS_PHONE_NO'] == 4917688800103) 
@@ -90,7 +90,7 @@ class WhatsappProcessor(BaseProcessor):
         }).reset_index()
 
         #--------------------------------------------------------------------------------------------------------------
-        dfY = pd.read_excel(Preisliste, usecols=['CUSTOMER_NAME', 'WABA', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE'])
+        dfY = pd.read_excel(Preisliste, usecols=['CUSTOMER_NAME', 'WABA', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE'], engine="calamine")
         meta_long = dfY.melt(
             id_vars=['CUSTOMER_NAME','WABA'],
             var_name='PRICING_CATEGORY',

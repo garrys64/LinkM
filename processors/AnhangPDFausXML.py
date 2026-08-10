@@ -12,7 +12,7 @@ import io
 
 class AnhangPDFausXML(BaseProcessor):
 
-    name = "Anhang PDF aus XML (nur XRechnung)"
+    name = "Anhang PDF aus XML"
 
     def render_ui(self):
 
@@ -29,10 +29,17 @@ class AnhangPDFausXML(BaseProcessor):
         tree = etree.parse(Datendatei)
         root = tree.getroot()
 
-        ns = {"ram": root.nsmap.get("ram")}
-
-        # AttachmentBinaryObject с mimeCode="application/pdf"
-        nodes = root.xpath("//ram:AttachmentBinaryObject[@mimeCode='application/pdf']", namespaces=ns)
+        # BinaryObject с mimeCode="application/pdf"
+        
+  
+        if root.nsmap.get("ram") is not None:
+            ns = {"ram": root.nsmap.get("ram")}
+            nodes = root.xpath("//ram:AttachmentBinaryObject[@mimeCode='application/pdf']", namespaces=ns)
+                
+        else:
+            ns = {"cbc": root.nsmap.get("cbc")}   
+            nodes = root.xpath("//cbc:EmbeddedDocumentBinaryObject[@mimeCode='application/pdf']", namespaces=ns)
+        
         if not nodes:
             raise RuntimeError("Anhang nicht gefunden")
             

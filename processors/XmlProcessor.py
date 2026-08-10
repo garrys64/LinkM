@@ -13,7 +13,7 @@ import io
 
 class XmlProcessor(BaseProcessor):
 
-    name = "Xml (Siemens)"
+    name = "Xml (Siemens)     "
 
     def render_ui(self):
 
