@@ -1,8 +1,11 @@
-streamlit==1.57.0
-lxml==6.1.1
-pandas==3.0.5
-numpy==2.2.1
-pikepdf==9.7.0
-python-calamine==0.8.2
-openpyxl==3.1.5
+streamlit
+pandas
+numpy
+lxml
+pretty_html_table
+openpyxl
+xlrd==2.0.1
+pikepdf
+streamlit[pdf]
+python-calamine
                                             
