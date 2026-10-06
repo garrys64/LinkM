@@ -96,27 +96,6 @@ class WhatsappProcessorAT(BaseProcessor):
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             result3.to_excel(writer, index=False, sheet_name='Sheet1')
-            
-###########################
-            
-        # Открываем записанный файл и красим
-        buffer.seek(0)
-        from openpyxl import load_workbook
-        from openpyxl.styles import PatternFill
-        wb = load_workbook(buffer)
-        ws = wb.active
-               
-        fill = PatternFill(start_color="cce6f0", end_color="cce6f0", fill_type="solid")
-        
-        for i, row_idx in enumerate(range(1, ws.max_row + 1)):
-            val = result3.iloc[i, 6]
-            if pd.notna(val) and str(val).strip() != "":
-                for col in range(1, ws.max_column + 1):
-                    ws.cell(row=row_idx, column=col).fill = fill
-
-        wb.save(buffer)
-
-###########################
        
         buffer.seek(0)
         data = {"df": buffer,"filename":  f"result_{Datendatei.name}", "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
