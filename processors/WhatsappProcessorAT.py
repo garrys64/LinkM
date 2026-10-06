@@ -96,6 +96,7 @@ class WhatsappProcessorAT(BaseProcessor):
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             result3.to_excel(writer, index=False, sheet_name='Sheet1')
+            
        
         buffer.seek(0)
         data = {"df": buffer,"filename":  f"result_{Datendatei.name}", "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
