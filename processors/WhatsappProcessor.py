@@ -12,7 +12,7 @@ import os
 import io
 import pandas as pd
 import numpy as np
-import time
+
 
 class WhatsappProcessor(BaseProcessor):
 
@@ -23,116 +23,108 @@ class WhatsappProcessor(BaseProcessor):
         Datendatei = st.file_uploader("Datendatei", type=["xlsx"])
         Preisliste = st.file_uploader("Preisliste", type=["xlsx","xlsm"])
         
+        col1, col2 = st.columns(2)
+
+        with col1:
+            ATDE = st.radio("AT/DE:", ["AT", "DE"], horizontal = True)
+        with col2:
+            FULLKURZ = st.radio("FULL/KURZ:" , ["FULL", "KURZ"], horizontal = True)
+        
         return {
             "Datendatei": Datendatei,
             "Preisliste": Preisliste,
+            
+            "ATDE": ATDE,
+            "FULLKURZ": FULLKURZ,
         }
 
     def process(self, data):
 
         Datendatei = data["Datendatei"]
         Preisliste = data["Preisliste"]
-        output_files = []
-
-#---
-        df = pd.read_excel(Datendatei, usecols=['WABA', 'WABA_NAME', 'PRICING_CATEGORY', 'BUSINESS_PHONE_NO', 'MESSAGES', 'AMOUNT'], engine="calamine")
-               
-#####---NUR BUSINESS_PHONE_NO  = 4917688800103 ---заменить на нужный-------------------------------------------
-        #condition = (df['BUSINESS_PHONE_NO'] == 4917688800103) 
-
-        #for idx in df[condition].index:
-            #df.loc[idx, 'WABA'] = 0
-            #df.loc[idx, 'WABA_NAME'] = df.loc[idx, 'WABA_NAME'] + '_BT'
-#####--------------------------------------------------------------------------------------------------------------------------------------
-#####---NUR DE500 WABA ?????? [9992066484947186470, 999281787285012305] ---заменить на нужные-------------
-        #values_col1 = [9992066484947186470, 999281787285012305]
-
-        #for item in values_col1:
-            #condition = (df['WABA'] == item) & (df['PRICING_CATEGORY'] == 'marketing') 
-
-            #remaining = 500
-            #for idx in df[condition].index:
-                #if remaining <= 0:
-                    #break
-                #decrease = min(df.loc[idx, 'MESSAGES'], remaining)
-                #df.loc[idx, 'MESSAGES'] -= decrease
-                #df.loc[idx, 'AMOUNT'] = 0
-                #remaining -= decrease               
-#####--------------------------------------------------------------------------------------------------------------------------------------
-      
-                
-#####------------------------------------------------------------------------------------------------------
-        if REFERRAL_CONVERSION:
-#### mit referral_conversion 
-         
-            df['PRICING_CATEGORY'] = np.where(df['PRICING_CATEGORY'] == 'service', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE')
-        else:
-#### ohne referral_conversion      
         
-            conditions = [
-                df['PRICING_CATEGORY'] == 'service',
-                df['PRICING_CATEGORY'] == 'referral_conversion'
-            ]
+        ATDE = data["ATDE"]
+        FULLKURZ = data["FULLKURZ"]
 
-            choices = [
-                'GEBUR_SERVICE',
-                'GEBUR_referral_conversion'
-            ]
-
-            df['PRICING_CATEGORY'] = np.select(conditions, choices, default='GEBUR_TEMPLATE')
         
-#####------------------------------------------------------------------------------------------------------
 
-                 
-        result = df.groupby(['WABA', 'PRICING_CATEGORY']).agg({
+#===========================================================
+        GEBUR_SERVICE = 0.009           #****************
+
+        df = pd.read_excel(Datendatei, usecols=['WABA', 'PRICING_CATEGORY', 'COUNTRY', 'MESSAGES', 'UNIT_RATE', 'AMOUNT', 'BILLING_PERIOD'], engine="calamine")
+                       
+        result = df.groupby(['WABA', 'PRICING_CATEGORY','COUNTRY']).agg({
             'MESSAGES': 'sum',
+            'UNIT_RATE': 'first',
+            'BILLING_PERIOD': 'first',
             'AMOUNT': 'sum'   
         }).reset_index()
 
         #--------------------------------------------------------------------------------------------------------------
-        dfY = pd.read_excel(Preisliste, usecols=['CUSTOMER_NAME', 'WABA', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE'], engine="calamine")
-        meta_long = dfY.melt(
+        df0 = pd.read_excel(Preisliste, engine="calamine")
+        df1 = df0[(df0['COUNTRY'] == ATDE)  & (df0['CHECK'] == 'Y')]
+        
+        if 'WABA_ID' in df1.columns: 
+            df1['WABA'] = df1['WABA_ID']                    #****************
+            df1['GEBUR_SERVICE'] = GEBUR_SERVICE            #****************
+            df1['GEBUR_TEMPLATE'] = df1['EINHEITPREIS']     #****************
+
+        df_preis_sum = df1[['CUSTOMER_NAME','WABA', 'GRUNDPREIS', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE']]
+
+
+        #--------------rename------------------------------------------------------------------------------------------
+        df_preis = df1[['CUSTOMER_NAME', 'WABA', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE']].rename(
+            columns={'GEBUR_SERVICE': 'service'}
+        )
+        df_preis = df_preis[['CUSTOMER_NAME', 'WABA', 'service']].assign(
+            marketing=df1['GEBUR_TEMPLATE'],
+            utility=df1['GEBUR_TEMPLATE'],
+            autentification=df1['GEBUR_TEMPLATE']
+        )
+        
+        df_preis_sum = df1[['CUSTOMER_NAME','WABA', 'GRUNDPREIS']]
+
+        #--------------Pyvot------------------------------------------------------------------------------------------
+        pyvot_PRICING_CATEGORY = df_preis.melt(
             id_vars=['CUSTOMER_NAME','WABA'],
             var_name='PRICING_CATEGORY',
             value_name='meta_value'
         )
 
         #--------------------------------------------------------------------------------------------------------------
-        result= result.merge(meta_long, on=['WABA', 'PRICING_CATEGORY'], how='right')
+        result = result.merge(pyvot_PRICING_CATEGORY, on=['WABA', 'PRICING_CATEGORY'])
         result['AMOUNT'] = result['AMOUNT'] +result['MESSAGES'].fillna(0) * result['meta_value'].fillna(0)
+        result['UNIT_RATE'] = result['UNIT_RATE'] + result['meta_value'].fillna(0)
 
         #--------------------------------------------------------------------------------------------------------------
-        result2 = result.groupby(['WABA']).agg({
-            'CUSTOMER_NAME': 'first', 
+        # Суммы по WABA
+        result_sum = result.groupby(['WABA']).agg({
             'MESSAGES': 'sum',
             'AMOUNT': 'sum'   
         }).reset_index()
+        
+        result_sum = result_sum.merge(df_preis_sum, on=['WABA'], how='right')
+        result_sum['TOTAL'] = result_sum['AMOUNT'].fillna(0) +result_sum['GRUNDPREIS'].fillna(0)
+        
+        #--------------------------------------------------------------------------------------------------------------  
+        # Данные + Суммы
+        if FULLKURZ == 'FULL':
+            result_sheet = pd.concat([result, result_sum], ignore_index=True)
+            result_sheet = result_sheet[['CUSTOMER_NAME', 'PRICING_CATEGORY', 'COUNTRY', 'MESSAGES', 'UNIT_RATE', 'AMOUNT', 'GRUNDPREIS', 'TOTAL']]
+            result_sheet = result_sheet.sort_values(['CUSTOMER_NAME', 'PRICING_CATEGORY', 'COUNTRY'], ascending=[True,True,True])
+        else:
+            result_sheet = result_sum
+            result_sheet = result_sheet[['CUSTOMER_NAME', 'MESSAGES', 'AMOUNT', 'GRUNDPREIS', 'TOTAL']]
+            result_sheet = result_sheet.sort_values(['CUSTOMER_NAME'], ascending=[True])
 
-        #--------------------------------------------------------------------------------------------------------------
-        dfY2 = pd.read_excel(Preisliste, usecols=['WABA', 'COUNTRY', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)'])
-
-        #--------------------------------------------------------------------------------------------------------------
-        result2= result2.merge(dfY2, on=['WABA'], how='left')
-        result2['TOTAL'] = (result2['AMOUNT'].fillna(0) + result2['GRUNDPREIS'].fillna(0) + result2['PAKETDE'].fillna(0)) * (100-result2['RABBAT(%)'].fillna(0)) / 100
-
-        #--------------------------------------------------------------------------------------------------------------
-        # Порядок столбцов для вывода
-        result2 = result2[['COUNTRY', 'CUSTOMER_NAME', 'MESSAGES', 'AMOUNT', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)', 'TOTAL']]
-
-        #--------------------------------------------------------------------------------------------------------------
-        # Сортировка по одному или нескольким столбцам
-        result2 = result2.sort_values(['COUNTRY','CUSTOMER_NAME'], ascending=[True, True])
-
-
-#---    
+#===========================================================    
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-            result2.to_excel(writer, index=False, sheet_name='Sheet1')
-       
+            result_sheet.to_excel(writer, index=False, sheet_name='Sheet1')
+                  
         buffer.seek(0)
         data = {"df": buffer,"filename":  f"result_{Datendatei.name}", "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
         
-
         return data
 
 
