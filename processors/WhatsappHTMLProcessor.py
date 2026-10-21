@@ -1,6 +1,6 @@
 # =========================================================
 #
-# PROCESSOR WhatsappHTMLFULLProcessor
+# PROCESSOR WhatsappHTMLProcessor
 # 
 # =========================================================
 
@@ -19,9 +19,9 @@ try:
 except (ImportError, ModuleNotFoundError):
     HTML = None
 
-class WhatsappHTMLFULLProcessor(BaseProcessor):
+class WhatsappHTMLProcessor(BaseProcessor):
 
-    name = "WhatsappHTMLFULL Processor"
+    name = "WhatsappHTML Processor"
 
     def render_ui(self):
 
