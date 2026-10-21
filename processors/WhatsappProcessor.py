@@ -4,8 +4,6 @@
 # 
 # =========================================================
 
-REFERRAL_CONVERSION = False
-
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
 import os
