@@ -14,10 +14,7 @@ import pandas as pd
 from html import escape
 import zipfile
 
-try:
-    from weasyprint import HTML
-except (ImportError, ModuleNotFoundError):
-    HTML = None
+
 
 class WhatsappHTMLProcessor(BaseProcessor):
 
@@ -27,7 +24,11 @@ class WhatsappHTMLProcessor(BaseProcessor):
 
         Datendatei = st.file_uploader("Datendatei", type=["xlsx"])
         Preisliste = st.file_uploader("Preisliste", type=["xlsx","xlsm"])
-        
+        try:
+            from weasyprint import HTML
+        except (ImportError, ModuleNotFoundError):
+            HTML = None
+            
         if HTML is not None:
             xFormat = st.radio("Format:", ["HTML", "PDF", "ZIP"])
         else:
