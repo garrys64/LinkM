@@ -52,7 +52,37 @@ class WhatsappProcessor(BaseProcessor):
         GEBUR_SERVICE = 0.009           #****************
 
         df = pd.read_excel(Datendatei, usecols=['WABA', 'PRICING_CATEGORY', 'COUNTRY', 'MESSAGES', 'UNIT_RATE', 'AMOUNT', 'BILLING_PERIOD'], engine="calamine")
-                       
+
+##---NUR DE500 WABA 
+        values_col1 = [101308222986139, 117528971326434]
+        for item in values_col1:
+            condition = (df['WABA'] == item) & (df['PRICING_CATEGORY'] == 'marketing')  & (df['COUNTRY'] == 'Germany')
+
+            remaining = 500
+            for idx in df[condition].index:
+                if remaining <= 0:
+                    break
+                decrease = min(df.loc[idx, 'MESSAGES'], remaining)
+                df.loc[idx, 'MESSAGES'] -= decrease
+                df.loc[idx, 'AMOUNT'] = 0
+                remaining -= decrease  
+##
+##---NUR Maxda 
+        values_col1 = [220144250066881]
+        for item in values_col1:
+            condition = (df['WABA'] == item) & (df['PRICING_CATEGORY'] == 'service')
+
+            remaining = 2500
+            for idx in df[condition].index:
+                if remaining <= 0:
+                    break
+                decrease = min(df.loc[idx, 'MESSAGES'], remaining)
+                df.loc[idx, 'MESSAGES'] -= decrease
+                df.loc[idx, 'AMOUNT'] = 0
+                remaining -= decrease  
+##  
+
+       
         result = df.groupby(['WABA', 'PRICING_CATEGORY','COUNTRY']).agg({
             'MESSAGES': 'sum',
             'UNIT_RATE': 'first',
