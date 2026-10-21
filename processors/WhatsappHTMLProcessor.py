@@ -1,49 +1,99 @@
 # =========================================================
 #
-# PROCESSOR WhatsappHTMLProcessor
+# PROCESSOR WhatsappHTMLFULLProcessor
 # 
 # =========================================================
 
 #pip install python-calamine
+
+import time
 from processors.BaseProcessor import BaseProcessor
 import streamlit as st
 from io import BytesIO
 import pandas as pd
 from html import escape
+import zipfile
 
+try:
+    from weasyprint import HTML
+except (ImportError, ModuleNotFoundError):
+    HTML = None
 
-class WhatsappHTMLProcessor(BaseProcessor):
+class WhatsappHTMLFULLProcessor(BaseProcessor):
 
-    name = "WhatsappHTML Processor"
+    name = "WhatsappHTMLFULL Processor"
 
     def render_ui(self):
 
         Datendatei = st.file_uploader("Datendatei", type=["xlsx"])
         Preisliste = st.file_uploader("Preisliste", type=["xlsx","xlsm"])
         
+        if HTML is not None:
+            xFormat = st.radio("Format:", ["HTML", "PDF", "ZIP"])
+        else:
+            xFormat = "HTML"
         
         return {
             "Datendatei": Datendatei,
             "Preisliste": Preisliste,
+            "xFormat": xFormat,
         }
 
     def process(self, data):
+        e_time = time.time()  # Засекаем время начала 
+
 
         Datendatei = data["Datendatei"]
         Preisliste = data["Preisliste"]
+        xFormat = data["xFormat"]
         
-        xFormat = "HTML"
-
+        zip_buffer = BytesIO()
 
 #---
+
+#---
+        GEBUR_SERVICE = 0.009           #****************
         #df = pd.read_parquet(Datendatei)
         df = pd.read_excel(Datendatei, usecols=['WABA', 'WABA_NAME', 'PRICING_CATEGORY', 'COUNTRY', 'MESSAGES', 'AMOUNT'], engine="calamine")
+        
+##---NUR DE500 WABA 
+        values_col1 = [101308222986139, 117528971326434]
+        for item in values_col1:
+            condition = (df['WABA'] == item) & (df['PRICING_CATEGORY'] == 'marketing')  & (df['COUNTRY'] == 'Germany')
 
-        df2 = pd.read_excel(Preisliste, usecols=['WABA', 'GRUNDPREIS', 'PAKETDE', 'RABBAT(%)', 'GEBUR_TEMPLATE', 'GEBUR_SERVICE'], engine="calamine")
+            remaining = 500
+            for idx in df[condition].index:
+                if remaining <= 0:
+                    break
+                decrease = min(df.loc[idx, 'MESSAGES'], remaining)
+                df.loc[idx, 'MESSAGES'] -= decrease
+                df.loc[idx, 'AMOUNT'] = 0
+                remaining -= decrease  
+##
+##---NUR Maxda 
+        values_col1 = [220144250066881]
+        for item in values_col1:
+            condition = (df['WABA'] == item) & (df['PRICING_CATEGORY'] == 'service')
+
+            remaining = 2500
+            for idx in df[condition].index:
+                if remaining <= 0:
+                    break
+                decrease = min(df.loc[idx, 'MESSAGES'], remaining)
+                df.loc[idx, 'MESSAGES'] -= decrease
+                df.loc[idx, 'AMOUNT'] = 0
+                remaining -= decrease  
+## 
+
+        df2 = pd.read_excel(Preisliste, engine="calamine")
+
+        if 'WABA_ID' in df2.columns: 
+            df2['WABA'] = df2['WABA_ID']                    #****************
+            df2['GEBUR_SERVICE'] = GEBUR_SERVICE            #****************
+            df2['GEBUR_TEMPLATE'] = df2['EINHEITPREIS']     #****************
 
         df2["GRUNDPREIS"] = df2["GRUNDPREIS"].fillna(0)
         df2["PAKETDE"] = df2["PAKETDE"].fillna(0)
-        df2["RABBAT(%)"] = df2["RABBAT(%)"].fillna(0)
         df2["GEBUR_TEMPLATE"] = df2["GEBUR_TEMPLATE"].fillna(0)
         df2["GEBUR_SERVICE"] = df2["GEBUR_SERVICE"].fillna(0)
             
@@ -113,14 +163,13 @@ class WhatsappHTMLProcessor(BaseProcessor):
 
         <h2>WhatsApp Report</h2>
         
-        <div style="display: grid; grid-template-columns: 215px 50px 75px 75px 50px 50px 30px 80px; font-weight: bold; background-color: #f0f0f0; border-bottom: 2px solid #333;">
+        <div style="display: grid; grid-template-columns: 215px 50px 75px 75px 50px 50px 80px; font-weight: bold; background-color: #f0f0f0; border-bottom: 2px solid #333;">
             <span style="text-align: left;">Name</span>
             <span style="text-align: right;">Messages</span>
             <span style="text-align: right;">Amount</span>
-            <span style="text-align: right;">Tr_gebur</span>
-            <span style="text-align: right;">Gr.preis</span>
+            <span style="text-align: right;">Tr.Gebur</span>
+            <span style="text-align: right;">Gr.Preis</span>
             <span style="text-align: right;">Paket</span>
-            <span style="text-align: right;">(%)</span>
             <span style="text-align: right;">Total</span>
         </div>
         
@@ -133,149 +182,164 @@ class WhatsappHTMLProcessor(BaseProcessor):
         sPaketDE = 0.0
         sTotal = 0.0
         
-        # ---------- WABA_NAME ----------       
+        # ---------- WABA_NAME ----------
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
 
-        for waba_name, waba_df in df.groupby("WABA_NAME"):
-        #--
-            mask = df2["WABA"] == waba_df["WABA"].iloc[0]
-            matches = df2.index[mask]
-            if len(matches) == 0:
-                continue                    
-            ind = df2.index.get_loc(matches[0])
-        #--        
-    
-            waba_messages = 0
-            waba_amount = 0            
-            tr_gebur0 = 0
-            
-            for category0, cat_df0 in waba_df.groupby("PRICING_CATEGORY"):
-
-                if category0 == "referral_conversion": 
-                    continue
-                    
-                cat_messages0 = cat_df0["MESSAGES"].sum()
-                waba_messages = waba_messages + cat_messages0 
+            for waba_name, waba_df in df.groupby("WABA_NAME"):
+            #--
+                mask = df2["WABA"] == waba_df["WABA"].iloc[0]
+                matches = df2.index[mask]
+                if len(matches) == 0:
+                    continue                    
+                ind = df2.index.get_loc(matches[0])
+            #--        
+        
+                waba_messages = 0
+                waba_amount = 0            
+                tr_gebur0 = 0
                 
-                waba_amount0 = cat_df0["AMOUNT"].sum()
-                waba_amount = waba_amount + waba_amount0
-                
-                if category0 == "service": 
-                    tr_gebur0 = tr_gebur0 + cat_messages0 * df2["GEBUR_SERVICE"].iloc[ind]
-                else:
-                    tr_gebur0 = tr_gebur0 + cat_messages0 * df2["GEBUR_TEMPLATE"].iloc[ind]
-                    
-                    
+                for category0, cat_df0 in waba_df.groupby("PRICING_CATEGORY"):
 
-            total = (waba_amount + tr_gebur0 + df2["GRUNDPREIS"].iloc[ind] + df2["PAKETDE"].iloc[ind]) * (1 - df2["RABBAT(%)"].iloc[ind] / 100)
-            
-            sMessages = sMessages + waba_messages
-            sAmount = sAmount + waba_amount
-            sTr_gebur = sTr_gebur + tr_gebur0
-            sGrundpreis = sGrundpreis + df2["GRUNDPREIS"].iloc[ind]
-            sPaketDE = sPaketDE + df2["PAKETDE"].iloc[ind]
-            sTotal = sTotal + total
-            
-            html += f"""
-            
-            <details>
-            <summary class="waba_name" style="list-style: none;">
-            <div style="display: grid; grid-template-columns: 210px 50px 75px 75px 50px 50px 30px 80px; font-weight: bold; >
-            <span class="col_name">{escape(waba_name)}</span>
-            <span class="messages">{waba_messages}</span>
-            <span class="amount">{money(waba_amount)}</span>
-            <span class="amount">{money(tr_gebur0)}</span>
-            <span class="amount">{df2["GRUNDPREIS"].iloc[ind]}</span>
-            <span class="amount">{df2["PAKETDE"].iloc[ind]}</span>
-            <span class="amount">{df2["RABBAT(%)"].iloc[ind]}</span>
-            <span class="amount">{money(total)}</span>
-            </div>
-            </summary>
-
-            """
-
-            if xFormat == "HTML":
-            # ---------- CATEGORY ----------
-
-                for category, cat_df in waba_df.groupby("PRICING_CATEGORY"):
-                
-                    if category == "referral_conversion": 
+                    if category0 == "referral_conversion": 
                         continue
-
-                    cat_messages = cat_df["MESSAGES"].sum()
-                    cat_amount = cat_df["AMOUNT"].sum()
                         
-                    if category == "service": 
-                        tr_gebur = cat_messages * df2["GEBUR_SERVICE"].iloc[ind]
+                    cat_messages0 = cat_df0["MESSAGES"].sum()
+                    waba_messages = waba_messages + cat_messages0 
+                    
+                    waba_amount0 = cat_df0["AMOUNT"].sum()
+                    waba_amount = waba_amount + waba_amount0
+                    
+                    if category0 == "service": 
+                        tr_gebur0 = tr_gebur0 + cat_messages0 * df2["GEBUR_SERVICE"].iloc[ind]
                     else:
-                        tr_gebur = cat_messages * df2["GEBUR_TEMPLATE"].iloc[ind]
+                        tr_gebur0 = tr_gebur0 + cat_messages0 * df2["GEBUR_TEMPLATE"].iloc[ind]
+                        
+                        
 
-                    html += f"""
-                    <details>
-                    <summary class="category">
-                    {escape(category)}
-                    |
-                    Messages: <span class="messages">{cat_messages}</span>
-                    |
-                    Amount: <span class="amount">{money(cat_amount)}</span>
-                    |
-                    Tr_gebur: <span class="amount">{money(tr_gebur)}</span>
-                    </summary>
-                    
-                    <table>
-                    <tr>
-                        <th>Country</th>
-                        <th>Messages</th>
-                        <th>Amount</th>
-                    </tr>
-                    """
-                    
-                    # ---------- COUNTRY ----------
+                total = (waba_amount + tr_gebur0 + df2["GRUNDPREIS"].iloc[ind] + df2["PAKETDE"].iloc[ind]) 
+                
+                sMessages = sMessages + waba_messages
+                sAmount = sAmount + waba_amount
+                sTr_gebur = sTr_gebur + tr_gebur0
+                sGrundpreis = sGrundpreis + df2["GRUNDPREIS"].iloc[ind]
+                sPaketDE = sPaketDE + df2["PAKETDE"].iloc[ind]
+                sTotal = sTotal + total
+                
+                html += f"""
+                
+                <details>
+                <summary class="waba_name" style="list-style: none;">
+                <div style="display: grid; grid-template-columns: 210px 50px 75px 75px 50px 50px 80px; font-weight: bold; >
+                <span class="col_name">{escape(waba_name)}</span>
+                <span class="messages">{waba_messages}</span>
+                <span class="amount">{money(waba_amount)}</span>
+                <span class="amount">{money(tr_gebur0)}</span>
+                <span class="amount">{df2["GRUNDPREIS"].iloc[ind]}</span>
+                <span class="amount">{df2["PAKETDE"].iloc[ind]}</span>
+                <span class="amount">{money(total)}</span>
+                </div>
+                </summary>
 
-                    for country, country_df in cat_df.groupby("COUNTRY"):
-                        country_messages = country_df["MESSAGES"].sum()
-                        country_amount = country_df["AMOUNT"].sum()
+                """
+
+                if xFormat == "HTML" or xFormat == "ZIP":
+                # ---------- CATEGORY ----------
+
+                    for category, cat_df in waba_df.groupby("PRICING_CATEGORY"):
+                    
+                        if category == "referral_conversion": 
+                            continue
+
+                        cat_messages = cat_df["MESSAGES"].sum()
+                        cat_amount = cat_df["AMOUNT"].sum()
+                            
+                        if category == "service": 
+                            tr_gebur = cat_messages * df2["GEBUR_SERVICE"].iloc[ind]
+                        else:
+                            tr_gebur = cat_messages * df2["GEBUR_TEMPLATE"].iloc[ind]
 
                         html += f"""
+                        <details>
+                        <summary class="category">
+                        {escape(category)}
+                        |
+                        Messages: <span class="messages">{cat_messages}</span>
+                        |
+                        Amount: <span class="amount">{money(cat_amount)}</span>
+                        |
+                        Tr_gebur: <span class="amount">{money(tr_gebur)}</span>
+                        </summary>
+                        
+                        <table>
                         <tr>
-                            <td>{country}</td>
-                            <td class="messages">{country_messages}</td>
-                            <td class="amount">{money(country_amount)}</td>
+                            <th>Country</th>
+                            <th>Messages</th>
+                            <th>Amount</th>
                         </tr>
                         """
-                    html += """
-                    </table>
+                        
+                        # ---------- COUNTRY ----------
 
-                    </details>
-                    """
-            html += """
-            </details>
-            </body>
-            </html>
-            """
+                        for country, country_df in cat_df.groupby("COUNTRY"):
+                            country_messages = country_df["MESSAGES"].sum()
+                            country_amount = country_df["AMOUNT"].sum()
 
-            
-        if xFormat == "HTML":
-            html += f"""
-            <div style="display: grid; grid-template-columns: 215px 50px 75px 75px 50px 50px 30px 80px; font-weight: bold; background-color: #f0f0f0; border-top: 2px solid #333;">
-                <span style="text-align: left;">GESAMT</span>
-                <span style="text-align: right;">{sMessages}</span>  
-                <span style="text-align: right;">{money(sAmount)}</span>
-                <span style="text-align: right;">{money(sTr_gebur)}</span>
-                <span style="text-align: right;">{sGrundpreis}</span>
-                <span style="text-align: right;">{sPaketDE}</span>
-                <span style="text-align: right;">-</span>
-                <span style="text-align: right;">{money(sTotal)}</span>
-            </div>
-            </body>
-            </html>
-            """
-    #---    
-            if xFormat == "HTML":
-                buffer = BytesIO(html.encode("utf-8"))
-                buffer.seek(0)
-                data = {"df": buffer,"filename":  f"{Datendatei.name}.html", "mime": "text/html; charset=utf-8"}
+                            html += f"""
+                            <tr>
+                                <td>{country}</td>
+                                <td class="messages">{country_messages}</td>
+                                <td class="amount">{money(country_amount)}</td>
+                            </tr>
+                            """
+                        html += """
+                        </table>
+
+                        </details>
+                        """
+                html += """
+                </details>
+                </body>
+                </html>
+                """
+                if xFormat == "ZIP":
+                    buffer = BytesIO()
+                    HTML(string=html.encode("utf-8")).write_pdf(buffer)
+                    zip_file.writestr(f"{waba_name}.pdf", buffer.getvalue())                    
+                    html = html0
                 
-
+            if xFormat == "HTML" or xFormat == "PDF":
+                html += f"""
+                <div style="display: grid; grid-template-columns: 215px 50px 75px 75px 50px 50px 80px; font-weight: bold; background-color: #f0f0f0; border-top: 2px solid #333;">
+                    <span style="text-align: left;">GESAMT</span>
+                    <span style="text-align: right;">{sMessages}</span>  
+                    <span style="text-align: right;">{money(sAmount)}</span>
+                    <span style="text-align: right;">{money(sTr_gebur)}</span>
+                    <span style="text-align: right;">{sGrundpreis}</span>
+                    <span style="text-align: right;">{sPaketDE}</span>
+                    <span style="text-align: right;">{money(sTotal)}</span>
+                </div>
+                </body>
+                </html>
+                """
+        #---    
+                if xFormat == "HTML":
+                    buffer = BytesIO(html.encode("utf-8"))
+                    buffer.seek(0)
+                    data = {"df": buffer,"filename":  f"{Datendatei.name}.html", "mime": "text/html; charset=utf-8"}
+                    
+                if xFormat == "PDF":
+                    buffer = BytesIO()
+                    HTML(string=html.encode("utf-8")).write_pdf(buffer)
+                    buffer.seek(0)
+                    data = {"df": buffer,"filename":  f"{Datendatei.name}.pdf", "mime": "application/pdf"}
+                           
+                    
+            if xFormat == "ZIP":
+                zip_buffer.seek(0)
+                data = {"df": zip_buffer, "filename":  f"{Datendatei.name}.zip", "mime": "application/zip"}
+            
+            st.write(f"Time : {time.time() - e_time:.2f}" )
 
         return data
 
