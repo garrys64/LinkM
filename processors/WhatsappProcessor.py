@@ -51,6 +51,18 @@ class WhatsappProcessor(BaseProcessor):
 
         df = pd.read_excel(Datendatei, usecols=['WABA', 'PRICING_CATEGORY', 'COUNTRY', 'MESSAGES', 'UNIT_RATE', 'AMOUNT', 'BILLING_PERIOD'], engine="calamine")
 
+        #--------------------------------------------------------------------------------------------------------------
+        df0 = pd.read_excel(Preisliste, engine="calamine")
+        df1 = df0[(df0['COUNTRY'] == ATDE)  & (df0['CHECK'] == 'Y')]
+        
+        if 'WABA_ID' in df1.columns: 
+            df1['WABA'] = df1['WABA_ID']                    #****************
+            df1['GEBUR_SERVICE'] = GEBUR_SERVICE            #****************
+            df1['GEBUR_TEMPLATE'] = df1['EINHEITPREIS']     #****************
+
+        df_preis_sum = df1[['CUSTOMER_NAME','WABA', 'GRUNDPREIS', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE']]
+
+        
 ##---NUR DE500 WABA 
         values_col1 = [101308222986139, 117528971326434]
         for item in values_col1:
@@ -64,22 +76,29 @@ class WhatsappProcessor(BaseProcessor):
                 df.loc[idx, 'MESSAGES'] -= decrease
                 df.loc[idx, 'AMOUNT'] = 0
                 remaining -= decrease  
+                
+                
 ##
-##---NUR Maxda 
-        values_col1 = [220144250066881]
+##---NUR Maxda values_col1 = [220144250066881]
+
+        values_col1 = df_preis_sum['WABA'].tolist() 
+        
         for item in values_col1:
             condition = (df['WABA'] == item) & (df['PRICING_CATEGORY'] == 'service')
-
-            remaining = 2500
+            
+            remaining = 1000
+            if item == 220144250066881:
+                remaining = 2500
+                
             for idx in df[condition].index:
+                st.write(item)
                 if remaining <= 0:
                     break
                 decrease = min(df.loc[idx, 'MESSAGES'], remaining)
                 df.loc[idx, 'MESSAGES'] -= decrease
                 df.loc[idx, 'AMOUNT'] = 0
                 remaining -= decrease  
-##  
-
+## 
        
         result = df.groupby(['WABA', 'PRICING_CATEGORY','COUNTRY']).agg({
             'MESSAGES': 'sum',
@@ -87,18 +106,8 @@ class WhatsappProcessor(BaseProcessor):
             'BILLING_PERIOD': 'first',
             'AMOUNT': 'sum'   
         }).reset_index()
-
-        #--------------------------------------------------------------------------------------------------------------
-        df0 = pd.read_excel(Preisliste, engine="calamine")
-        df1 = df0[(df0['COUNTRY'] == ATDE)  & (df0['CHECK'] == 'Y')]
         
-        if 'WABA_ID' in df1.columns: 
-            df1['WABA'] = df1['WABA_ID']                    #****************
-            df1['GEBUR_SERVICE'] = GEBUR_SERVICE            #****************
-            df1['GEBUR_TEMPLATE'] = df1['EINHEITPREIS']     #****************
-
-        df_preis_sum = df1[['CUSTOMER_NAME','WABA', 'GRUNDPREIS', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE']]
-
+        
 
         #--------------rename------------------------------------------------------------------------------------------
         df_preis = df1[['CUSTOMER_NAME', 'WABA', 'GEBUR_SERVICE', 'GEBUR_TEMPLATE']].rename(
