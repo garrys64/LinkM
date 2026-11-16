@@ -55,7 +55,7 @@ class Autobahn(BaseProcessor):
             df2.to_excel(writer, index=False, sheet_name='Sheet1')
        
         buffer.seek(0)
-        data = {"df": buffer,"filename":  f"result_{f.name}", "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+        data = {"df": buffer,"filename":  f"result_Autobahn", "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
         
 
         return data
