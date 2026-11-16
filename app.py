@@ -6,6 +6,7 @@ import streamlit as st
 
 from processors.BaseProcessor import BaseProcessor
 from processors.TollCollectProcessor import TollCollectProcessor
+from processors.Autobahn import Autobahn
 from processors.XmlProcessor import XmlProcessor
 from processors.WhatsappProcessor import WhatsappProcessor
 
@@ -18,6 +19,7 @@ from processors.AnhangPDFausXML import AnhangPDFausXML
 
 processors = [
     TollCollectProcessor(),
+    Autobahn(),
     BwiProcessor(),
     XmlProcessor(),    
     pdf_Samlung_new(),    
@@ -59,6 +61,8 @@ if not st.session_state["logged_in"]:
             st.error("No")
 
 else:
+#if True:
+
 #-----------
 
     st.sidebar.header("📊 Mein Processors")
