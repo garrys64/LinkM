@@ -23,11 +23,16 @@ class Autobahn(BaseProcessor):
         }
 
     def process(self, data):
+    
+        preis_de = 0.071
+        preis_not_de = 0.10
 
         Datendatei = data["Datendatei"]
         col = "D"
         count_de = 0
         count_not_de = 0
+        
+        
         for f in Datendatei:
             df = pd.read_excel(f, header=None, usecols=col, engine="calamine" )
             df = df.iloc[2:-6]
@@ -41,8 +46,8 @@ class Autobahn(BaseProcessor):
             {
                 "SMS": ["DE national", "DE international"],
                 "Count": [count_de, count_not_de],
-                "Preis": ["0,071","0,10"],
-                "Summe": [count_de * 0.071,count_not_de * 0.10],
+                "Preis": [preis_de,preis_not_de],
+                "Summe": [count_de * preis_de,count_not_de * preis_not_de],
             }
         )       
         buffer = io.BytesIO()

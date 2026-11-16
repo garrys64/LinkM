@@ -76,7 +76,8 @@ else:
 
     selected_processor_name = st.sidebar.pills(
         "Processor",
-        list(processor_dict.keys()),default = list(processor_dict.keys())[0]
+        list(processor_dict.keys()),default = list(processor_dict.keys())[0],
+        required = True
     )
 
     processor = processor_dict[selected_processor_name]
